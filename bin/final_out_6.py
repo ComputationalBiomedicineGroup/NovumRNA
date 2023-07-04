@@ -1,0 +1,125 @@
+#!/usr/bin/env python3
+
+from Bio import SeqIO
+from Bio.SeqRecord import SeqRecord
+import argparse
+from Bio.Seq import Seq
+from Bio.SeqIO.FastaIO import SimpleFastaParser
+import pandas as pd
+import re as re
+import numpy as np
+
+parser = argparse.ArgumentParser(description='tranlate to proteins')
+parser.add_argument('--Filtering', type=str, help='')
+parser.add_argument('--VAF', type=str, help='')
+parser.add_argument('--BED', type=str, help='')
+parser.add_argument('--Translation', type=str, help='')
+parser.add_argument('--BED_2', type=str, help='')
+parser.add_argument('--BIND', type=str, help='TPM file from whippet')
+parser.add_argument('--Specific', type=str, help='output file')
+parser.add_argument('--Out', type=str, help='output file')
+parser.add_argument('--Out_header', type=str, help='output file')
+args = parser.parse_args()
+
+Filtering = pd.read_csv(args.Filtering, sep='\t', header=None)
+Filtering.rename(columns={1:'Peptide'}, inplace=True)
+Filtering["Annotation"] = Filtering[0].str.split("_").str[3].str.split(" ").str[0]
+Filtering["Transcript"] = Filtering[0].str.split("_").str[0]
+Filtering["Peptide_START"] = Filtering[0].str.split("_").str[1].astype(int)
+Filtering["Peptide_STOP"] = Filtering[0].str.split("_").str[2].astype(int)
+Filtering = Filtering.drop([0, 2], axis = 1)
+
+VAF = pd.read_csv(args.VAF, sep='\t', header=None)
+VAF = VAF[[3,4,6,9,15,16,17]]
+VAF_Filtering = pd.merge(how = "inner", left=Filtering, right=VAF, left_on=["Transcript"], right_on=[9])
+VAF_Filtering["Remove"] = np.where((VAF_Filtering["Peptide_START"] >= VAF_Filtering[3]) & (VAF_Filtering["Peptide_STOP"] <= VAF_Filtering[4]), "Fine", "Remove")
+VAF_Filtering = VAF_Filtering[VAF_Filtering["Remove"] != "Remove"]
+VAF_Filtering = VAF_Filtering.drop(["Remove", 3, 4, 6, 9], axis = 1)
+VAF_Filtering.columns = ["Peptide", "Annotation", "Transcript", "Peptide_START", "Peptide_STOP", "isoform_count", "TPM_iso_VAF", "Cov_within_VAF"]
+
+BED = pd.read_csv(args.BED, sep='\t')
+BED = BED[["Chr", "E_START", "E_STOP", "STRAND", "Annotation", "NT_Overlap", "Overlap_perc", "ID", "E_Coverage", "TPM"]]
+BED["Transcript"] = BED["ID"].str.split("_").str[2]
+BED = BED.drop("ID", axis = 1)
+
+BED_Filtering = pd.merge(how = "inner", left=VAF_Filtering, right=BED, left_on=["Transcript", "Annotation"], right_on=["Transcript", "Annotation"])
+BED_Filtering["Remove"] = np.where((BED_Filtering["Peptide_START"] >= BED_Filtering["E_START"]) & (BED_Filtering["Peptide_STOP"] <= BED_Filtering["E_STOP"]) & (BED_Filtering["STRAND"] == "+")
+         | (BED_Filtering["Peptide_START"] <= BED_Filtering["E_STOP"]) & (BED_Filtering["Peptide_STOP"] >= BED_Filtering["E_START"]) & (BED_Filtering["STRAND"] == "-"), "Fine", "Remove")
+BED_Filtering = BED_Filtering[BED_Filtering["Remove"] != "Remove"]
+BED_Filtering = BED_Filtering.drop("Remove", axis = 1)
+
+Translation = pd.read_csv(args.Translation, sep='\t')
+Translation = Translation[["ID", "Transcript_ref"]]
+Translation = Translation.drop_duplicates()
+Translation["Transcript"] = Translation["ID"].str.split("_").str[2]
+Translation["ID"] = Translation["ID"].str.split('_STRG').str[0]
+
+BED_Filtering_Translation = pd.merge(how = "inner", left=BED_Filtering, right=Translation, left_on="Transcript", right_on="Transcript")
+
+BED_2 = pd.read_csv(args.BED_2, sep='\t', header=None)
+
+def switch(Input):
+    if Input[5] == "-":
+        a = Input[2]
+        Input[2] = Input[1]
+        Input[1] = a
+    return(Input)
+
+BED_2 = BED_2.apply(switch, axis=1)
+
+BED_2[3] = "STRG" + BED_2[3].str.split("STRG").str[1].str.split("_").str[0]
+
+BED_2.columns = ["Chr", "Peptide_START", "Peptide_STOP", "Transcript","Peptide_nt", "Strand", "Annotation", "BAM_reads", "BAM_reads_all"]
+BED_2 = BED_2[["Peptide_START", "Peptide_STOP", "Transcript", "Annotation", "BAM_reads", "BAM_reads_all"]]
+
+BED_Filtering_Translation_2 = pd.merge(left=BED_Filtering_Translation, right=BED_2, left_on=["Transcript", "Peptide_START", "Peptide_STOP", "Annotation"], 
+                         right_on=["Transcript", "Peptide_START", "Peptide_STOP", "Annotation"], how='left')
+
+
+BIND = pd.read_csv(args.BIND, sep='\t', skiprows=1)
+Headers = pd.read_csv(args.BIND, sep='\t', nrows=1).columns
+
+def check_pres(sub, test_str):
+    for ele in sub:
+        if ele in test_str:
+            return 0
+    return 1
+
+Test = list(Headers)
+res = [("Rank" + "_" + idx) for idx in Test if not idx.startswith("Unnamed")]
+res_2 = [idx for idx in BIND.columns if idx.startswith("Rank")]
+res_2 = [idx for idx in res_2 if check_pres(idx, "BA")]
+BIND_2 = BIND[res_2]
+
+BIND_2.columns = list(res)
+BIND_2["Peptide"] = BIND["Peptide"]
+BIND_2 = BIND_2.drop_duplicates()
+BIND_2 = BIND_2.drop_duplicates("Peptide")
+
+BED_Filtering_Translation_2_BIND = pd.merge(left=BED_Filtering_Translation_2, right=BIND_2, left_on=["Peptide"], 
+                         right_on=["Peptide"], how='left')
+
+Specific = pd.read_csv(args.Specific, sep='\t')
+Specific = Specific[["Full", "REF", "REF_NT", "NEW_NT", "Mismatch"]]
+Specific = Specific.drop_duplicates("Full")
+
+Final = pd.merge(left=BED_Filtering_Translation_2_BIND, right=Specific, left_on=["Peptide"], 
+                         right_on=["Full"], how='left')
+
+Final["Mismatch"] = Final["Mismatch"].str.strip("[]")
+Final = Final.dropna()
+Final_2 = Final[["Chr", "Peptide_START", "Peptide_STOP", "Peptide", "Transcript", "STRAND", "ID", "Mismatch"]]
+Final_3 = Final.drop(["Chr", "Peptide_START", "Peptide_STOP", "Transcript", "ID", "Peptide", "STRAND", "Full", "Mismatch"], axis = 1)
+Final_4 = pd.concat([Final_2, Final_3], axis=1)
+
+def switch_2(Input):
+    if Input["STRAND"] == "-":
+        a = Input[2]
+        Input[2] = Input[1]
+        Input[1] = a
+    return(Input)
+
+Final_5 = Final_4.apply(switch_2, axis=1)
+
+Final_5.to_csv(args.Out, sep="\t", index=False, header = None)
+Final_5.to_csv(args.Out_header, sep="\t", index=False)
