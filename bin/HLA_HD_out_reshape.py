@@ -3,10 +3,11 @@
 import pandas as pd
 import argparse
 import io
+from itertools import permutations
 
-parser = argparse.ArgumentParser(description='Refine HLA-HD output')
-parser.add_argument('--HLA_HD_out', type=str, help='HLA-HD output')
-parser.add_argument('--file_out', type=str, help='output file')
+parser = argparse.ArgumentParser()
+parser.add_argument('--HLA_HD_out', type=str)
+parser.add_argument('--file_out', type=str)
 args = parser.parse_args()
 
 data_file = args.HLA_HD_out
@@ -38,39 +39,26 @@ column_names = [i for i in range(0, largest_column_count)]
 # Read csv
 DRB = pd.read_csv(data_file, header=None, delimiter=data_file_delimiter, names=column_names, skipfooter = 8, skiprows = 3, engine='python')
 # This list is from the command line tool option -list, it gives the avilable alleles to not run in errors later
-HLA = pd.read_csv("/home/ausserh/projects/2021/CRCnoncanonical/nonCanonicalNeoAG/possible_MHCII_alleles.txt", sep = ",", header=None)
+HLA = pd.read_csv("/scripts/Valid_HLAII_alleles.txt", sep = ",", header=None)
 
-DRB[1] = DRB[1].str.replace('HLA-', '')
-DRB[1] = DRB[1].str.replace('*', '')
-DRB[1] = DRB[1].str.replace(':', '')
-DRB[2] = DRB[2].str.replace('HLA-', '')
-DRB[2] = DRB[2].str.replace('*', '')
-DRB[2] = DRB[2].str.replace(':', '')
+DRB[1] = DRB[1].str.replace('HLA-', '').str.rsplit(':', n=1).str[0]
+DRB[2] = DRB[2].str.replace('HLA-', '').str.rsplit(':', n=1).str[0]
 
 DRB_1 = DRB[1][(DRB[1] != 'Not typed') & (DRB[1] != '-')]
 DRB_2 = DRB[2][(DRB[2] != 'Not typed') & (DRB[2] != '-')]
 
 DRB_both = DRB_1.tolist() + DRB_2.tolist()
 
+allowed_prefixes = ['DQB1', 'DQA1', 'DPA1', 'DPB1']
+allowed_data = [item for item in DRB_both if any(prefix in item for prefix in allowed_prefixes)]
+rest_data = [item for item in DRB_both if not any(prefix in item for prefix in allowed_prefixes)]
+
+combinations_list = ["-".join(perm) for perm in permutations(allowed_data, 2)]
+DRB_both = combinations_list + rest_data
+
 if DRB_both:
-    y = []
-    for i in DRB_both:
-        if "DRB" in i :
-            a = i[:4] + '_' + i[4:8]
-        else:
-            a = i[:8]
-        y.append(a)
-
-    df = pd.DataFrame(data=y)
-    
-    y = []
-    for i in df[0]:
-        if HLA[0].str.contains(i).any():
-            Value = HLA[HLA[0].str.contains(i)]
-            y.append(Value[0].iloc[0])
-
-    df = pd.DataFrame(data=y)
+    Final_list = HLA[HLA[0].isin(DRB_both)]
 else:
-    df = pd.DataFrame(data=[])
+    Final_list = pd.DataFrame(data=[])
 
-df.to_csv(args.file_out, header= None, index = False)
+Final_list.to_csv(args.file_out, header= None, index = False)

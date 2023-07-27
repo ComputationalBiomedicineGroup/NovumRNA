@@ -3,9 +3,9 @@
 import pandas as pd
 import argparse
 
-parser = argparse.ArgumentParser(description='tranlate to proteins')
-parser.add_argument('--GTF', type=str, help='')
-parser.add_argument('--Out', type=str, help='')
+parser = argparse.ArgumentParser()
+parser.add_argument('--GTF', type=str)
+parser.add_argument('--Out', type=str)
 args = parser.parse_args()
 
 mTEC_all = pd.read_csv(args.GTF, sep='\t', header=None)

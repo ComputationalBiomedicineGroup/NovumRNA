@@ -1,24 +1,20 @@
 #!/usr/bin/env python3
 
-from Bio import SeqIO
-from Bio.SeqRecord import SeqRecord
 import argparse
-from Bio.Seq import Seq
-from Bio.SeqIO.FastaIO import SimpleFastaParser
 import pandas as pd
 import re as re
 import numpy as np
 
-parser = argparse.ArgumentParser(description='tranlate to proteins')
-parser.add_argument('--Filtering', type=str, help='')
-parser.add_argument('--VAF', type=str, help='')
-parser.add_argument('--BED', type=str, help='')
-parser.add_argument('--Translation', type=str, help='')
+parser = argparse.ArgumentParser()
+parser.add_argument('--Filtering', type=str)
+parser.add_argument('--VAF', type=str)
+parser.add_argument('--BED', type=str)
+parser.add_argument('--Translation', type=str)
 parser.add_argument('--BED_2', type=str, help='')
-parser.add_argument('--BIND', type=str, help='TPM file from whippet')
-parser.add_argument('--Specific', type=str, help='output file')
-parser.add_argument('--Out', type=str, help='output file')
-parser.add_argument('--Out_header', type=str, help='output file')
+parser.add_argument('--BIND', type=str)
+parser.add_argument('--Specific', type=str)
+parser.add_argument('--Out', type=str)
+parser.add_argument('--Out_header', type=str)
 args = parser.parse_args()
 
 Filtering = pd.read_csv(args.Filtering, sep='\t', header=None)
@@ -35,7 +31,7 @@ VAF_Filtering = pd.merge(how = "inner", left=Filtering, right=VAF, left_on=["Tra
 VAF_Filtering["Remove"] = np.where((VAF_Filtering["Peptide_START"] >= VAF_Filtering[3]) & (VAF_Filtering["Peptide_STOP"] <= VAF_Filtering[4]), "Fine", "Remove")
 VAF_Filtering = VAF_Filtering[VAF_Filtering["Remove"] != "Remove"]
 VAF_Filtering = VAF_Filtering.drop(["Remove", 3, 4, 6, 9], axis = 1)
-VAF_Filtering.columns = ["Peptide", "Annotation", "Transcript", "Peptide_START", "Peptide_STOP", "isoform_count", "TPM_iso_VAF", "Cov_within_VAF"]
+VAF_Filtering.columns = ["Peptide", "Annotation", "Transcript", "Peptide_START", "Peptide_STOP", "isoform_count", "TPM_iso_fraction", "Cov_within_VAF"]
 
 BED = pd.read_csv(args.BED, sep='\t')
 BED = BED[["Chr", "E_START", "E_STOP", "STRAND", "Annotation", "NT_Overlap", "Overlap_perc", "ID", "E_Coverage", "TPM"]]
@@ -75,26 +71,15 @@ BED_2 = BED_2[["Peptide_START", "Peptide_STOP", "Transcript", "Annotation", "BAM
 BED_Filtering_Translation_2 = pd.merge(left=BED_Filtering_Translation, right=BED_2, left_on=["Transcript", "Peptide_START", "Peptide_STOP", "Annotation"], 
                          right_on=["Transcript", "Peptide_START", "Peptide_STOP", "Annotation"], how='left')
 
-
-BIND = pd.read_csv(args.BIND, sep='\t', skiprows=1)
-Headers = pd.read_csv(args.BIND, sep='\t', nrows=1).columns
-
-def check_pres(sub, test_str):
-    for ele in sub:
-        if ele in test_str:
-            return 0
-    return 1
-
-Test = list(Headers)
-res = [("Rank" + "_" + idx) for idx in Test if not idx.startswith("Unnamed")]
-res_2 = [idx for idx in BIND.columns if idx.startswith("Rank")]
-res_2 = [idx for idx in res_2 if check_pres(idx, "BA")]
-BIND_2 = BIND[res_2]
-
-BIND_2.columns = list(res)
-BIND_2["Peptide"] = BIND["Peptide"]
-BIND_2 = BIND_2.drop_duplicates()
-BIND_2 = BIND_2.drop_duplicates("Peptide")
+BIND = pd.read_csv(args.BIND, sep='\t')
+BIND = BIND[["HLA Allele", "Best Percentile", "Epitope Seq"]]
+# Use pivot to make 'HLA Allele' values as columns
+pivoted_df = BIND.groupby(['Epitope Seq', 'HLA Allele'])['Best Percentile'].min().unstack(fill_value=0).reset_index()
+# If you want to fill NaNs with 0
+pivoted_df = pivoted_df.fillna(0)
+pivoted_df.columns = ['Rank_' + str(col) if col != 'Epitope Seq' else col for col in pivoted_df.columns]
+pivoted_df = pivoted_df.rename(columns={'Epitope Seq': 'Peptide'})
+BIND_2 = pivoted_df.drop_duplicates("Peptide")
 
 BED_Filtering_Translation_2_BIND = pd.merge(left=BED_Filtering_Translation_2, right=BIND_2, left_on=["Peptide"], 
                          right_on=["Peptide"], how='left')

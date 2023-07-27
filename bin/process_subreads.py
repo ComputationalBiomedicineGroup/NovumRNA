@@ -2,19 +2,37 @@
 
 import argparse
 import pandas as pd
-from Bio import SeqIO
-from Bio.SeqRecord import SeqRecord
 from Bio.Seq import Seq
-from Bio.SeqIO.FastaIO import SimpleFastaParser
 import re as re
+import csv
 
-parser = argparse.ArgumentParser(description='tranlate to proteins')
-parser.add_argument('--tsv_file', type=str, help='')
-parser.add_argument('--tsv_out', type=str, help='output file')
-parser.add_argument('--BAM_cov', type=int, help='output file')
+parser = argparse.ArgumentParser()
+parser.add_argument('--tsv_file', type=str)
+parser.add_argument('--tsv_out', type=str)
+parser.add_argument('--BAM_cov', type=int)
 args = parser.parse_args()
 
-BED = pd.read_csv(args.tsv_file, sep = "\t", engine='python', header = None, error_bad_lines=False)
+data = []
+
+# Read the file line by line and process each line
+with open(args.tsv_file, 'r') as file:
+    reader = csv.reader(file, delimiter='\t')
+    for row in reader:
+        # Check the number of values in the row
+        num_values = len(row)
+        
+        # If the row has only 1 value, add NaN to the data list
+        if num_values == 1:
+            data.append([row[0], pd.NA])
+        # If the row has 8 values, add all of them to the data list
+        elif num_values == 8:
+            data.append(row)
+        # For any other number of values, raise an error or handle accordingly
+        else:
+            continue
+
+# Create a DataFrame from the processed data list
+BED = pd.DataFrame(data)
 
 BED["SAMPLE"] = BED[3].str.split("STRG").str[1].fillna(method='ffill')
 BED["SAMPLE"] = "STRG" + BED["SAMPLE"]

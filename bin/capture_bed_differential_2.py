@@ -3,11 +3,11 @@
 import pandas as pd
 import argparse
 
-parser = argparse.ArgumentParser(description='tranlate to proteins')
-parser.add_argument('--BED', type=str, help='')
-parser.add_argument('--Out', type=str, help='')
-parser.add_argument('--tpm_max_diff', type=int, help='')
-parser.add_argument('--cov_max_diff', type=int, help='')
+parser = argparse.ArgumentParser()
+parser.add_argument('--BED', type=str)
+parser.add_argument('--Out', type=str)
+parser.add_argument('--tpm_max_diff', type=int)
+parser.add_argument('--cov_max_diff', type=int)
 args = parser.parse_args()
 
 

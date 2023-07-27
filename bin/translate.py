@@ -12,19 +12,19 @@ import difflib
 import itertools
 import numpy as np
 
-parser = argparse.ArgumentParser(description='tranlate to proteins')
-parser.add_argument('--Short_GTF', type=str, help='input fasta from gffread')
-parser.add_argument('--Stringtie_tsv', type=str, help='input fasta from gffread')
-parser.add_argument('--Gencode_GTF', type=str, help='output fasta')
-parser.add_argument('--Reference_tsv', type=str, help='output fasta')
-parser.add_argument('--Regions_bed', type=str, help='output fasta')
-parser.add_argument('--peptide_length', nargs="+", default=[9, 15], type=int, help='output fasta')
-parser.add_argument('--closest_out', type=str, help='reference fasta')
-parser.add_argument('--matching_out', type=str, help='reference fasta')
-parser.add_argument('--Bed_out', type=str, help='reference fasta')
-parser.add_argument('--Overlaps_out', type=str, help='reference fasta')
-parser.add_argument('--Peptides_out', type=str, help='reference fasta')
-parser.add_argument('--Regions_fasta', type=str, help='reference fasta')
+parser = argparse.ArgumentParser()
+parser.add_argument('--Short_GTF', type=str)
+parser.add_argument('--Stringtie_tsv', type=str)
+parser.add_argument('--Gencode_GTF', type=str)
+parser.add_argument('--Reference_tsv', type=str)
+parser.add_argument('--Regions_bed', type=str)
+parser.add_argument('--peptide_length', nargs="+", default=[9, 15], type=int)
+parser.add_argument('--closest_out', type=str)
+parser.add_argument('--matching_out', type=str)
+parser.add_argument('--Bed_out', type=str)
+parser.add_argument('--Overlaps_out', type=str)
+parser.add_argument('--Peptides_out', type=str)
+parser.add_argument('--Regions_fasta', type=str)
 args = parser.parse_args()
 
 GTF_07H103 = pd.read_csv(args.Short_GTF, sep='\t', header=None)
@@ -227,7 +227,7 @@ records2.columns = ["Translated", "Transcript"]
 
 BED = pd.read_csv(args.Regions_bed, sep = "\t", engine='python', header = None)
 BED.columns = ["Chr", "Overlap_START", "Overlap_STOP", "ID", "Annotation", "STRAND"]
-BED["ID_2"] = BED["ID"].str.rsplit('_', 1).str[0]
+BED["ID_2"] = BED["ID"].str.rsplit('_', n=1).str[0]
 Test_8 = df[[6, 8]]
 BED_3 = pd.merge(how="inner", left=BED, right=Test_8, left_on="ID_2", right_on=6)
 BED_3 = BED_3.drop(["ID_2", 6], axis = 1)
@@ -324,8 +324,8 @@ def all_comes_together(Input, params=[1,2,3,4]):
 
         Combined = Combined.apply(overlap_position_strand, 1)
 
-        Combined["Sample"] = Combined["Sample"].str.rsplit('_', 1).str[0]
-        Combined["ID"] = Combined["ID"].str.rsplit('_', 1).str[0]
+        Combined["Sample"] = Combined["Sample"].str.rsplit('_', n=1).str[0]
+        Combined["ID"] = Combined["ID"].str.rsplit('_', n=1).str[0]
 
         Combined.to_csv(args.Overlaps_out, sep='\t', index = False)
 

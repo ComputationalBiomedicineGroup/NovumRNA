@@ -5,15 +5,15 @@ import argparse
 import mapply
 import numpy as np
 
-parser = argparse.ArgumentParser(description='tranlate to proteins')
-parser.add_argument('--BED', type=str, help='peptides from whippet downstream')
-parser.add_argument('--GTF', type=str, help='peptides from whippet downstream')
-parser.add_argument('--Out_anno', type=str, help='output file')
-parser.add_argument('--Out_bed', type=str, help='output file')
-parser.add_argument('--TPM_min_diff', type=int, help='output file')
-parser.add_argument('--Cov_min_diff', type=int, help='output file')
-parser.add_argument('--TPM_min_novel', type=int, help='output file')
-parser.add_argument('--Cov_min_novel', type=int, help='output file')
+parser = argparse.ArgumentParser()
+parser.add_argument('--BED', type=str)
+parser.add_argument('--GTF', type=str)
+parser.add_argument('--Out_anno', type=str)
+parser.add_argument('--Out_bed', type=str)
+parser.add_argument('--TPM_min_diff', type=int)
+parser.add_argument('--Cov_min_diff', type=int)
+parser.add_argument('--TPM_min_novel', type=int)
+parser.add_argument('--Cov_min_novel', type=int)
 args = parser.parse_args()
 
 GTEx_bed = pd.read_csv(args.BED, sep='\t', header=None)

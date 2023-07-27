@@ -1,18 +1,11 @@
 #!/usr/bin/env python3
-
-from Bio import SeqIO
-from Bio.SeqRecord import SeqRecord
 import argparse
-from Bio.Seq import Seq
-from Bio.SeqIO.FastaIO import SimpleFastaParser
 import pandas as pd
-import re as re
-import numpy as np
 
-parser = argparse.ArgumentParser(description='tranlate to proteins')
-parser.add_argument('--BED', type=str, help='')
-parser.add_argument('--BED_old', type=str, help='')
-parser.add_argument('--Out', type=str, help='output file')
+parser = argparse.ArgumentParser()
+parser.add_argument('--BED', type=str)
+parser.add_argument('--BED_old', type=str)
+parser.add_argument('--Out', type=str)
 args = parser.parse_args()
 
 Final_anno = pd.read_csv(args.BED, sep='\t', header = None)

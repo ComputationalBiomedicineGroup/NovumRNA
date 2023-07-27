@@ -2,6 +2,91 @@
 
 nextflow.enable.dsl=2
 
+// IEDB installation
+iedb_chck_file_name = ".iedb_install_ok.chck"
+iedb_chck_file = file("${params.outdir}iedb"+ "/" + iedb_chck_file_name)
+
+    process 'install_IEDB' {
+
+        input:
+        val(iedb_MHCI_url)
+        val(iedb_MHCII_url)
+
+        output:
+        path("${iedb_chck_file_name}")
+
+        if(!iedb_chck_file.exists() || iedb_chck_file.isEmpty()) {
+
+          log.warn "WARNING: IEDB yet not installed, starting installation. This may take a while..."
+
+          script:
+          def mhci_file = iedb_MHCI_url.split("/")[-1]
+          def mhcii_file = iedb_MHCII_url.split("/")[-1]
+          """
+          CWD=`pwd`
+          cd /opt/iedb/
+          rm -f $mhci_file
+          wget $iedb_MHCI_url
+          tar -xzvf $mhci_file
+          cd mhc_i
+          bash -c "./configure"
+          cd /opt/iedb/
+          rm -f $mhci_file
+
+          rm -f $mhcii_file
+          wget $iedb_MHCII_url
+          tar -xzvf $mhcii_file
+          cd mhc_ii
+          bash -c "python ./configure.py"
+          cd /opt/iedb/
+          rm $mhcii_file
+
+          cd \$CWD
+          echo "OK" > ${iedb_chck_file_name}
+          """
+
+        } else {
+            script:
+            """
+            echo "OK" > "${iedb_chck_file_name}"
+            """
+        }
+}
+
+process 'pVACbind_class_I' {
+
+  errorStrategy 'ignore'
+
+  input: 
+  tuple val(meta), path(peptides_I), path(optiTypeOutput), path(reads), path(HLA_types_I), path(HLA_types_II)
+  path(iedb)
+
+  output:
+  path("test.txt")
+    
+  script:
+    """
+    pvacbind run --iedb-install-directory /opt/iedb $peptides_fasta $meta.ID $hla_alleles "NetMHCpan" . 
+    """
+}
+
+process 'pVACbind_class_II' {
+
+  errorStrategy 'ignore'
+
+  input: 
+  tuple val(meta), path (peptides_II), path(HLAHD_Output), path(reads), path(HLA_types_I), path(HLA_types_II)
+  path(iedb)
+
+  output:
+  path("test.txt")
+    
+  script:
+    """
+    pvacbind run --iedb-install-directory /opt/iedb $peptides_fasta $meta.ID $hla_alleles "NetMHCIIpan" . 
+    """
+}
+
 process 'Indices' {
 
   errorStrategy 'ignore'
@@ -132,7 +217,7 @@ process 'StringTie' {
   def longreads =  longreads ? "-L" : ""
   """
   stringtie -p ${task.cpus} -o "${meta.ID}_stringtie.gtf" $bam -G $reference_gtf
-  python3 rename_stringtie.py --stringtie_out "${meta.ID}_stringtie.gtf" --gtf_out "${meta.ID}_stringtie_renamed.gtf" --vaf_out "${meta.ID}_vaf.tsv"
+  python3 bin/rename_stringtie.py --stringtie_out "${meta.ID}_stringtie.gtf" --gtf_out "${meta.ID}_stringtie_renamed.gtf" --vaf_out "${meta.ID}_vaf.tsv"
   """
 }
 

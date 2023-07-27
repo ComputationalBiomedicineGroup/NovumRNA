@@ -9,12 +9,12 @@ import pandas as pd
 import re as re
 import difflib
 
-parser = argparse.ArgumentParser(description='tranlate to proteins')
-parser.add_argument('--fasta_in', type=str, help='input fasta from gffread')
-parser.add_argument('--peptides', type=str, help='output fasta')
-parser.add_argument('--regions', type=str, help='output fasta')
-parser.add_argument('--tsv_out', type=str, help='output fasta')
-parser.add_argument('--tsv_out_meta', type=str, help='output fasta')
+parser = argparse.ArgumentParser()
+parser.add_argument('--fasta_in', type=str)
+parser.add_argument('--peptides', type=str)
+parser.add_argument('--regions', type=str)
+parser.add_argument('--tsv_out', type=str)
+parser.add_argument('--tsv_out_meta', type=str)
 args = parser.parse_args()
 
 def get_overlap(s1, s2):
