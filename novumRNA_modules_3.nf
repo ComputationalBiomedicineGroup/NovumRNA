@@ -317,8 +317,11 @@ process 'Protein_to_peptides' {
   script:
   """
   if [ $ref_pep == "Test_ref_pep.txt" ]; then
-    /scripts/protein_2_peptides.py --fasta_in $proteins --fasta_out "Control_peptides_len_${length_1}.fasta" --pep_len $length_1 --window_shift 1
+    /scripts/protein_2_peptide.py --fasta_in $proteins --fasta_out "Control_peptides_len_${length_1}.fasta" --pep_len $length_1 --window_shift 1
     seqkit rmdup -s "Control_peptides_len_${length_1}.fasta" > "Control_peptides_len_${length_1}_rmdup.fasta"
+    rm "Control_peptides_len_${length_1}.fasta"
+  elif [ $ref_pep == "Control_peptides_len_${length_1}_rmdup.fasta" ]; then
+    echo "Fine" 
   else
     mv $ref_pep "Control_peptides_len_${length_1}_rmdup.fasta"
   fi  
@@ -551,6 +554,7 @@ process 'final_out_1' {
 }
 
 process 'Metadata_MHCI' {
+  errorStrategy 'ignore'
 
   input: 
   tuple val(meta), path(filtering), path(vaf), path(bed), path(translation), path(bed_2), path(specific), path(bind)
@@ -568,6 +572,7 @@ process 'Metadata_MHCI' {
 }
 
 process 'Metadata_MHCII' {
+  errorStrategy 'ignore'
 
   input: 
   tuple val(meta), path(filtering), path(vaf), path(bed), path(translation), path(bed_2), path(specific), path(bind)
@@ -597,5 +602,27 @@ process 'final_out_2' {
   script:
     """
    head -2 *1_peptides_II_binding.tsv > "${meta.ID}_final_II_out.tsv"; tail -n +3 -q *_peptides_II_binding.tsv >> "${meta.ID}_final_II_out.tsv"
+    """
+}
+
+process 'Rerun_samplesheet' {
+  errorStrategy 'ignore'
+
+  input: 
+  tuple val(meta), path(gtf), path(vaf), path(bam), path(bai), path(opti), path(hlahd), path(hla_I), path(hla_II)
+  val(outdir) 
+    
+  output:
+  tuple val(meta), path ("${meta.ID}_rerun_samplesheet.csv")
+    
+  script:
+  def batch = file(params.input_fastq).splitCsv(header:true)
+  def Read1 = file(batch.Read1)
+  def Read2 = file(batch.Read2)
+  def HLA_I = file(batch.HLA_types)
+  def HLA_II = file(batch.HLA_types_II)
+    """
+    echo "ID,Read1,Read2,GTF,VAF,BAM,BAI,OPTI,HLAHD,HLA_types,HLA_types_II" > "${meta.ID}_rerun_samplesheet.csv"
+    echo "$Read1,$Read2,${outdir}StringTie/$gtf,${outdir}StringTie/$gtf,${outdir}alignment/$bam,${outdir}alignment/$bai,${outdir}OptiType/$opti,${outdir}HLA_HD/$hlahd,${outdir}/$hla_I,${outdir}/$hla_II"
     """
 }
