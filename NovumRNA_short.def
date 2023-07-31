@@ -9,7 +9,8 @@ From: ubuntu:latest
     export LD_LIBRARY_PATH="/opt/hdf5/lib:$LD_LIBRARY_PATH"
     export HDF5_DIR="/opt/hdf5"
     export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
-    export PATH="/usr/lib/coinor-cbc:$PATH"
+    export PATH=$JAVA_HOME/bin:$PATH
+    export PATH="/usr/bin/cbc:$PATH"
 
 %post
     # Install system dependencies
@@ -37,6 +38,7 @@ From: ubuntu:latest
         libhdf5-dev \
         subversion \
         coinor-cbc \
+        glpk-utils \
         liblapack-dev \
         libatlas-base-dev \
         libblas-dev \
@@ -58,6 +60,12 @@ From: ubuntu:latest
     mkdir /scripts/
     mkdir /references/
 
+    # Install Jvarkit
+    git clone --branch v20200206 https://github.com/lindenb/jvarkit.git
+    cd jvarkit
+    ./gradlew biostar154220 sam4weblogo sortsamrefname
+    cd ..
+    
     # Install Samtools
     wget https://github.com/samtools/samtools/releases/download/1.12/samtools-1.12.tar.bz2
     tar xf samtools-1.12.tar.bz2
@@ -126,14 +134,6 @@ From: ubuntu:latest
     wget https://github.com/gpertea/gffread/releases/download/v0.12.3/gffread-0.12.3.Linux_x86_64.tar.gz
     tar xf gffread-0.12.3.Linux_x86_64.tar.gz
     cp gffread-0.12.3.Linux_x86_64/gffread /usr/local/bin/
-
-    # Install Jvarkit
-    wget https://github.com/lindenb/jvarkit/archive/refs/tags/2021.10.13.zip
-    unzip 2021.10.13.zip
-    cd jvarkit-2021.10.13/
-    ./gradlew biostar154220 sam4weblogo sortsamrefname
-    cp dist/*.jar /usr/local/bin/
-    cd ..
 
 %runscript
     echo "Singularity container for Nextflow pipeline"

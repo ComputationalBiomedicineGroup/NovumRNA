@@ -90,7 +90,7 @@ process 'OptiType' {
   reads = (meta.libType == "PE") ? fastq[0] + " " + fastq[1] : fastq
     """
     if [ $HLA_types_I == "HLA_default.txt" ]; then
-       /yara-build/bin/yara_mapper --version-check 0 -e 3 -t 8 -f bam $HLA_ref $fastq | samtools view -@ 8 -h -F 4 -b1 -o "${meta.ID}_mapped_1.bam"
+       /yara-build/bin/yara_mapper --version-check 0 -e 3 -t ${task.cpus} -f bam $HLA_ref $fastq | samtools view -@ ${task.cpus} -h -F 4 -b1 -o "${meta.ID}_mapped_1.bam"
        samtools sort "${meta.ID}_mapped_1.bam" > "${meta.ID}_mapped_1_sorted.bam"
        samtools index "${meta.ID}_mapped_1_sorted.bam"
        python3 /OptiType-1.3.3/OptiTypePipeline.py -i "${meta.ID}_mapped_1_sorted.bam" --rna -o . -v -p $meta.ID
@@ -147,7 +147,6 @@ process 'StringTie' {
   input:
       tuple val (meta), path (bam), path(bai)
       path reference_gtf
-      val(longreads)
 
   output:
       tuple val (meta), path("${meta.ID}_stringtie_renamed.gtf")
@@ -156,7 +155,6 @@ process 'StringTie' {
 
 
   script:
-  def longreads =  longreads ? "-L" : ""
   """
   stringtie -p ${task.cpus} -o "${meta.ID}_stringtie.gtf" $bam -G $reference_gtf
   python3 /scripts/rename_stringtie.py --stringtie_out "${meta.ID}_stringtie.gtf" --gtf_out "${meta.ID}_stringtie_renamed.gtf" --vaf_out "${meta.ID}_vaf.tsv"
@@ -312,18 +310,22 @@ process 'Protein_to_peptides' {
       val length_1
 
   output:
-      path ("Control_peptides_len_${length_1}_rmdup.fasta")
+      path ("Control_peptides_len_${length_1.replaceAll("\\s+", "_")}_rmdup.fasta")
 
   script:
+  def updated_length_1 = length_1.replaceAll("\\s+", "_")
   """
+  name="${updated_length_1}"
   if [ $ref_pep == "Test_ref_pep.txt" ]; then
-    /scripts/protein_2_peptide.py --fasta_in $proteins --fasta_out "Control_peptides_len_${length_1}.fasta" --pep_len $length_1 --window_shift 1
-    seqkit rmdup -s "Control_peptides_len_${length_1}.fasta" > "Control_peptides_len_${length_1}_rmdup.fasta"
-    rm "Control_peptides_len_${length_1}.fasta"
-  elif [ $ref_pep == "Control_peptides_len_${length_1}_rmdup.fasta" ]; then
+    /scripts/protein_2_peptide.py --fasta_in $proteins --fasta_out "Control_peptides_len_\${name}.fasta" --pep_len $updated_length_1 --window_shift 1
+    seqkit rmdup -s "Control_peptides_len_\${name}.fasta" > "Control_peptides_len_\${name}_rmdup.fasta"
+    rm "Control_peptides_len_\${name}.fasta"
+  elif [ $ref_pep == "Control_peptides_len_\${name}_rmdup.fasta" ]; then
+    cat $ref_pep > "Control_peptides_len_\${name}_rmdup.fasta"
     echo "Fine" 
+    echo \${name}
   else
-    mv $ref_pep "Control_peptides_len_${length_1}_rmdup.fasta"
+    mv $ref_pep "Control_peptides_len_\${name}_rmdup.fasta"
   fi  
   """
 }
@@ -366,7 +368,7 @@ process 'Translation' {
   seqkit fx2tab "${meta.ID}_stringtie.fasta" > "${meta.ID}_stringtie.tsv"
 
   /scripts/translate.py --Short_GTF "${meta.ID}_stringtie_short.gtf" --Stringtie_tsv "${meta.ID}_stringtie.tsv" \
-  --Gencode_GTF /data/genomes/hg38/annotation/gencode/gencode.v38.primary_assembly.annotation.gtf --Reference_tsv gencode.v38.pc_translations.tsv \
+  --Gencode_GTF $gtf --Reference_tsv gencode.v38.pc_translations.tsv \
   --closest_out "${meta.ID}_closest_reference.tsv" --matching_out "${meta.ID}_translated.tsv" --Regions_bed "${meta.ID}_overlap_clean.bed" --peptide_length $peptide_length --Bed_out "${meta.ID}_peptide_regions.bed" --Overlaps_out "${meta.ID}_overlaps.tsv" --Regions_fasta "${meta.ID}_regions.fasta" --Peptides_out "${meta.ID}_peptides.fasta"
   
   seqkit sort -n -i "${meta.ID}_peptides.fasta" > "${meta.ID}_peptides_class_sorted.fasta"
@@ -388,7 +390,7 @@ process 'Annotation' {
       val (cov_min_novel)
       val (tpm_min_diff)
       val (cov_min_diff)
-      path(inverted_bed)
+      path(capture_bed)
 
   output:
       tuple val (meta), path ("${meta.ID}_overlap.bed")
@@ -397,7 +399,7 @@ process 'Annotation' {
 
   script:
   """
-  /bedtools2/bin/bedtools intersect -wo -s -a $GTF -b $inverted_bed > "${meta.ID}_stringtie_specific_new.bed"
+  /bedtools2/bin/bedtools intersect -wo -s -a $GTF -b $capture_bed > "${meta.ID}_stringtie_specific_new.bed"
   /scripts/Clean_overlapers.py --BED "${meta.ID}_stringtie_specific_new.bed" --GTF $GTF --TPM_min_novel $tpm_min_novel --Cov_min_novel $cov_min_novel --Out_anno "${meta.ID}_annotation.bed" --Out_bed "${meta.ID}_overlap.bed" --TPM_min_diff $tpm_min_diff --Cov_min_diff $cov_min_diff
   """
 }
@@ -609,20 +611,17 @@ process 'Rerun_samplesheet' {
   errorStrategy 'ignore'
 
   input: 
-  tuple val(meta), path(gtf), path(vaf), path(bam), path(bai), path(opti), path(hlahd), path(hla_I), path(hla_II)
-  val(outdir) 
+  tuple val(meta), val(reads), val(hla_I), val(hla_II), path(bam), path(bai), path(gtf), path(vaf), path(opti), path(hlahd)
+  val(outdir)
     
   output:
   tuple val(meta), path ("${meta.ID}_rerun_samplesheet.csv")
     
   script:
-  def batch = file(params.input_fastq).splitCsv(header:true)
-  def Read1 = file(batch.Read1)
-  def Read2 = file(batch.Read2)
-  def HLA_I = file(batch.HLA_types)
-  def HLA_II = file(batch.HLA_types_II)
+  read1 = reads[0]
+  read2 = reads[1]
     """
     echo "ID,Read1,Read2,GTF,VAF,BAM,BAI,OPTI,HLAHD,HLA_types,HLA_types_II" > "${meta.ID}_rerun_samplesheet.csv"
-    echo "$Read1,$Read2,${outdir}StringTie/$gtf,${outdir}StringTie/$gtf,${outdir}alignment/$bam,${outdir}alignment/$bai,${outdir}OptiType/$opti,${outdir}HLA_HD/$hlahd,${outdir}/$hla_I,${outdir}/$hla_II"
+    echo "$meta.ID,$read1,$read2,${outdir}StringTie/$gtf,${outdir}StringTie/$vaf,${outdir}alignment/$bam,${outdir}alignment/$bai,${outdir}OptiType/$opti,${outdir}HLA_HD/HLA_HD_out/$meta.ID/result/$hlahd,$hla_I,$hla_II" >> "${meta.ID}_rerun_samplesheet.csv"
     """
 }
