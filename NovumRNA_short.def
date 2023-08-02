@@ -46,6 +46,9 @@ From: ubuntu:latest
         cmake \
         libopenblas-dev
 
+    # Create a symbolic link from python to python3
+    ln -s /usr/bin/python3 /usr/bin/python
+
     # Install Python packages
     /usr/bin/pip3 install numpy
     /usr/bin/pip3 install pyomo

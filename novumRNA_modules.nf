@@ -4,7 +4,7 @@ nextflow.enable.dsl=2
 
 // IEDB installation
 iedb_chck_file_name = "iedb_install_ok.chck"
-iedb_chck_file = file("${params.outdir_ref}/iedb/" + iedb_chck_file_name)
+iedb_chck_file = file("${params.input_ref}/iedb/" + iedb_chck_file_name)
 
     process 'install_IEDB' {
 
@@ -41,7 +41,7 @@ iedb_chck_file = file("${params.outdir_ref}/iedb/" + iedb_chck_file_name)
         cd \$CWD
         echo "OK" > "${iedb_chck_file_name}"
       else
-        echo "OK" > "${iedb_chck_file_name}"
+        echo "OK2" > "${iedb_chck_file_name}"
       fi
         """
 }
@@ -58,8 +58,8 @@ process 'Indices' {
   output:
   path("hisat_genome_index/"), optional: true
   path("star_index/"), optional: true
-  val("${params.outdir}Indices/hisat_genome_index/hisat_index")
-  val("${params.outdir}Indices/star_genome_index/star_index")
+  val("${params.input_ref}/Indices/hisat_genome_index/hisat_index")
+  val("${params.input_ref}/Indices/star_genome_index/star_index")
     
   script:
     """
@@ -70,7 +70,7 @@ process 'Indices' {
     fi
 
     if [ -z $star_index ]; then
-      /STAR-2.7.9a/source/STAR --runThreadN ${task.cpus} --runMode genomeGenerate --genomeDir star_index --genomeFastaFiles $genome   
+      /STAR-2.7.9a/source/STAR --runThreadN ${task.cpus} --runMode genomeGenerate --genomeDir star_index --genomeFastaFiles $genome --limitGenomeGenerateRAM 45000000000  
     fi
     """
 }
@@ -317,11 +317,13 @@ process 'Protein_to_peptides' {
   """
   name="${updated_length_1}"
   if [ $ref_pep == "Test_ref_pep.txt" ]; then
-    /scripts/protein_2_peptide.py --fasta_in $proteins --fasta_out "Control_peptides_len_\${name}.fasta" --pep_len $updated_length_1 --window_shift 1
-    seqkit rmdup -s "Control_peptides_len_\${name}.fasta" > "Control_peptides_len_\${name}_rmdup.fasta"
-    rm "Control_peptides_len_\${name}.fasta"
+    for len in $length_1; do
+      /scripts/protein_2_peptide.py --fasta_in $proteins --fasta_out "Control_peptides_len_\${len}.fasta" --pep_len \$len --window_shift 1
+      seqkit rmdup -s "Control_peptides_len_\${len}.fasta" > "Control_peptides_len_\${len}_rmdup.fasta"
+      rm "Control_peptides_len_\${len}.fasta"
+    done
+    cat *_rmdup.fasta > "Control_peptides_len_\${name}_rmdup.fasta"
   elif [ $ref_pep == "Control_peptides_len_\${name}_rmdup.fasta" ]; then
-    cat $ref_pep > "Control_peptides_len_\${name}_rmdup.fasta"
     echo "Fine" 
     echo \${name}
   else
@@ -621,7 +623,12 @@ process 'Rerun_samplesheet' {
   read1 = reads[0]
   read2 = reads[1]
     """
-    echo "ID,Read1,Read2,GTF,VAF,BAM,BAI,OPTI,HLAHD,HLA_types,HLA_types_II" > "${meta.ID}_rerun_samplesheet.csv"
-    echo "$meta.ID,$read1,$read2,${outdir}StringTie/$gtf,${outdir}StringTie/$vaf,${outdir}alignment/$bam,${outdir}alignment/$bai,${outdir}OptiType/$opti,${outdir}HLA_HD/HLA_HD_out/$meta.ID/result/$hlahd,$hla_I,$hla_II" >> "${meta.ID}_rerun_samplesheet.csv"
+    if [ $hlahd == "test_final.result.txt" ]; then
+      echo "ID,Read1,Read2,GTF,VAF,BAM,BAI,OPTI,HLAHD,HLA_types,HLA_types_II" > "${meta.ID}_rerun_samplesheet.csv"
+      echo "$meta.ID,$read1,$read2,${outdir}StringTie/$gtf,${outdir}StringTie/$vaf,${outdir}alignment/$bam,${outdir}alignment/$bai,${outdir}OptiType/$opti,${outdir}HLA_HD/HLA_HD_out/test/result/$hlahd,$hla_I,$hla_II" >> "${meta.ID}_rerun_samplesheet.csv"
+    else
+      echo "ID,Read1,Read2,GTF,VAF,BAM,BAI,OPTI,HLAHD,HLA_types,HLA_types_II" > "${meta.ID}_rerun_samplesheet.csv"
+      echo "$meta.ID,$read1,$read2,${outdir}StringTie/$gtf,${outdir}StringTie/$vaf,${outdir}alignment/$bam,${outdir}alignment/$bai,${outdir}OptiType/$opti,${outdir}HLA_HD/HLA_HD_out/$meta.ID/result/$hlahd,$hla_I,$hla_II" >> "${meta.ID}_rerun_samplesheet.csv"
+    fi  
     """
 }
