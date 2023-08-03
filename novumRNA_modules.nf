@@ -426,11 +426,19 @@ process 'Annotation_2' {
   mv $bed "${meta.ID}_regions.bed"
   samtools view -bq $quality -@ ${task.cpus} -L "${meta.ID}_regions.bed" $bam > "${meta.ID}_survivor_coverage_1.bam"
   samtools rmdup "${meta.ID}_survivor_coverage_1.bam" "${meta.ID}_survivor_coverage.bam"
-  java -jar /jvarkit/dist/sortsamrefname.jar --samoutputformat BAM "${meta.ID}_survivor_coverage.bam" > "${meta.ID}_survivor_coverage_refname.bam"
-  java -jar /jvarkit/dist/biostar154220.jar -n 100 --samoutputformat BAM "${meta.ID}_survivor_coverage_refname.bam" > "${meta.ID}_survivor_coverage_limited.bam"
+
+  java -jar /jvarkit/dist/sortsamrefname.jar --samoutputformat SAM "${meta.ID}_survivor_coverage.bam" > "${meta.ID}_survivor_coverage_refname.sam"
+  sed -i '1{/^@/!d}' "${meta.ID}_survivor_coverage_refname.sam"
+  samtools view -bh "${meta.ID}_survivor_coverage_refname.sam" > "${meta.ID}_survivor_coverage_refname.bam"
+  
+  java -jar /jvarkit/dist/biostar154220.jar -n 100 --samoutputformat SAM "${meta.ID}_survivor_coverage_refname.bam" > "${meta.ID}_survivor_coverage_limited.sam"
+  sed -i '1{/^@/!d}' "${meta.ID}_survivor_coverage_limited.sam"
+  samtools view -bh "${meta.ID}_survivor_coverage_limited.sam" > "${meta.ID}_survivor_coverage_limited.bam"
   samtools sort "${meta.ID}_survivor_coverage_limited.bam" > "${meta.ID}_survivor_coverage_limited_sorted.bam" 
-  samtools index "${meta.ID}_survivor_coverage_limited_sorted.bam" 
+  samtools index "${meta.ID}_survivor_coverage_limited_sorted.bam"
+
   java -jar /jvarkit/dist/sam4weblogo.jar -F tabular -r "${meta.ID}_regions.bed" "${meta.ID}_survivor_coverage_limited_sorted.bam" | grep -v '>' | grep -v "\\--" > "${meta.ID}_${bed.extension}_coverage_reads.tsv"
+  sed -i '/locked/d' "${meta.ID}_${bed.extension}_coverage_reads.tsv"
   /scripts/process_subreads.py --tsv_file "${meta.ID}_${bed.extension}_coverage_reads.tsv" --tsv_out "${meta.ID}_${bed.extension}_selected_sequences.bed" --BAM_cov $BAM_cov
   awk '{ printf ">%s\\n%s\\n",\$4"_"\$7,\$5 }' "${meta.ID}_${bed.extension}_selected_sequences.bed" | seqkit sort -n -i > "${meta.ID}_${bed.extension}_selected_sequences.fasta"
   """
