@@ -151,11 +151,22 @@ workflow capture_bed {
       if (row.Read1) { reads.add(file(row.Read1, checkIfExists: true)) }
           if (row.Read2) {
               reads.add(file(row.Read2, checkIfExists: true))
-              meta.libType = "PE"
-          }
-      raw_data.add([meta, reads])
-  }
-
+              meta.libType = "PE" }
+      def hlaTypesFile = row.HLA_types
+      if (hlaTypesFile) {
+        def hlaTypesFilePath = file(hlaTypesFile, checkIfExists: true)
+        raw_data.add([meta, reads, hlaTypesFilePath])
+    } else {
+        raw_data.add([meta, reads, file(params.default_hla)])
+    }
+      def hlaTypesFile_II = row.HLA_types_II
+      if (hlaTypesFile_II) {
+        def hlaTypesFilePath_II = file(hlaTypesFile_II, checkIfExists: true)
+        raw_data.last() << hlaTypesFilePath_II
+    } else {
+        raw_data.last() << file(params.default_hla_II)
+    }
+    }
   batch_raw_data_ch = Channel.fromList(raw_data)
   Indices(params.genome, params.hisat_index, params.star_index)
   alignment(params.genome, params.aligner, Indices.out[2], Indices.out[3], params.hisat_index, params.star_index, batch_raw_data_ch, params.two_pass, params.riboseq)  
