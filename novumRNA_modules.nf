@@ -56,10 +56,8 @@ process 'Indices' {
   val(star_index)
 
   output:
-  path("hisat_genome_index/"), optional: true
-  path("star_index/"), optional: true
-  val("${params.input_ref}/Indices/hisat_genome_index/hisat_index")
-  val("${params.input_ref}/Indices/star_genome_index/star_index")
+  path('*_genome_index')
+  path('*star_index')
     
   script:
     """
@@ -67,10 +65,14 @@ process 'Indices' {
       mkdir hisat_genome_index
       /hisat2-2.1.0/hisat2-build -p ${task.cpus} $genome hisat_index > hisat_index_log
       mv hisat_index* hisat_genome_index
+    else
+      mkdir not_used_hisat_genome_index
     fi
 
     if [ -z $star_index ]; then
-      /STAR-2.7.9a/source/STAR --runThreadN ${task.cpus} --runMode genomeGenerate --genomeDir star_index --genomeFastaFiles $genome --limitGenomeGenerateRAM 45000000000  
+      /STAR-2.7.9a/source/STAR --runThreadN ${task.cpus} --runMode genomeGenerate --genomeDir star_index --genomeFastaFiles $genome --limitGenomeGenerateRAM 45000000000
+    else
+      mkdir not_used_star_index   
     fi
     """
 }
@@ -106,8 +108,8 @@ process 'alignment' {
   input:
       path (genome)
       val (aligner)
-      val (self_hisat_index)
-      val (self_star_index)
+      path (self_hisat_index)
+      path (self_star_index)
       val (given_hisat_index)
       val (given_star_index)
       tuple val(meta), path(fastq), val(hla_types), val(hla_types_II)
@@ -119,8 +121,8 @@ process 'alignment' {
 
   script:
   // Check if genomeDir is provided and not empty
-    def index_star = (given_star_index != "") ? given_star_index : self_star_index
-    def index_hisat = (given_hisat_index != "") ? given_hisat_index : self_hisat_index
+    def index_star = (given_star_index != "") ? given_star_index : "star_index/"
+    def index_hisat = (given_hisat_index != "") ? given_hisat_index : "hisat_genome_index/hisat_index"
     def zcat = (fastq[0].getExtension() == "gz") ? "--readFilesCommand zcat" : ""
     reads_star = (meta.libType == "PE") ? fastq[0] + " " + fastq[1] : fastq
     reads_hisat = (meta.libType == "PE") ? "-1 " + fastq[0] + " -2 " + fastq[1] : fastq
@@ -310,7 +312,7 @@ process 'Protein_to_peptides' {
       val length_1
 
   output:
-      path ("Control_peptides_len_${length_1.replaceAll("\\s+", "_")}_rmdup.fasta")
+      path ("*ref_pep.fasta")
 
   script:
   def updated_length_1 = length_1.replaceAll("\\s+", "_")
@@ -322,12 +324,9 @@ process 'Protein_to_peptides' {
       seqkit rmdup -s "Control_peptides_len_\${len}.fasta" > "Control_peptides_len_\${len}_rmdup.fasta"
       rm "Control_peptides_len_\${len}.fasta"
     done
-    cat *_rmdup.fasta > "Control_peptides_len_\${name}_rmdup.fasta"
-  elif [ $ref_pep == "Control_peptides_len_\${name}_rmdup.fasta" ]; then
-    echo "Fine" 
-    echo \${name}
+    cat *_rmdup.fasta > "Control_peptides_len_\${name}_ref_pep.fasta"
   else
-    mv $ref_pep "Control_peptides_len_\${name}_rmdup.fasta"
+    cat $ref_pep > "Control_peptides_ref_pep.fasta"
   fi  
   """
 }
@@ -634,9 +633,11 @@ process 'Rerun_samplesheet' {
     if [ $hlahd == "test_final.result.txt" ]; then
       echo "ID,Read1,Read2,GTF,VAF,BAM,BAI,OPTI,HLAHD,HLA_types,HLA_types_II" > "${meta.ID}_rerun_samplesheet.csv"
       echo "$meta.ID,$read1,$read2,${outdir}StringTie/$gtf,${outdir}StringTie/$vaf,${outdir}alignment/$bam,${outdir}alignment/$bai,${outdir}OptiType/$opti,${outdir}HLA_HD/HLA_HD_out/test/result/$hlahd,$hla_I,$hla_II" >> "${meta.ID}_rerun_samplesheet.csv"
+      sed -i 's/null//g' "${meta.ID}_rerun_samplesheet.csv"
     else
       echo "ID,Read1,Read2,GTF,VAF,BAM,BAI,OPTI,HLAHD,HLA_types,HLA_types_II" > "${meta.ID}_rerun_samplesheet.csv"
       echo "$meta.ID,$read1,$read2,${outdir}StringTie/$gtf,${outdir}StringTie/$vaf,${outdir}alignment/$bam,${outdir}alignment/$bai,${outdir}OptiType/$opti,${outdir}HLA_HD/HLA_HD_out/$meta.ID/result/$hlahd,$hla_I,$hla_II" >> "${meta.ID}_rerun_samplesheet.csv"
+      sed -i 's/null//g' "${meta.ID}_rerun_samplesheet.csv"
     fi  
     """
 }

@@ -62,6 +62,7 @@ From: ubuntu:latest
 
     mkdir /scripts/
     mkdir /references/
+    mkdir /indices/
 
     # Install Jvarkit
     git clone --branch v20200206 https://github.com/lindenb/jvarkit.git
