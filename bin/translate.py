@@ -35,7 +35,7 @@ FASTA_07H103 = FASTA_07H103.drop("None", axis = 1)
 GTF_07H103["ID"] = GTF_07H103[8].str.split("transcript_id \"").str[1].str.split("\"").str[0]
 GTF_07H103 = pd.merge(how="inner", left=GTF_07H103, right=FASTA_07H103, left_on="ID", right_on="ID")
 GTF_gencode = pd.read_csv(args.Gencode_GTF, sep='\t', header=None, skiprows= 7)
-GTF_gencode["ID"] = GTF_gencode[8].str.split("transcript_id \"").str[1].str.split("\"").str[0]
+GTF_gencode["ID"] = GTF_gencode[8].str.extract(r'transcript_id "([^"]+)"')
 GTF_gencode_names = pd.read_csv(args.Reference_tsv, sep='\t', header=None)
 GTF_gencode_names.columns = ["ID", "Protein", "None"]
 GTF_gencode_names = GTF_gencode_names.drop("None", axis = 1)

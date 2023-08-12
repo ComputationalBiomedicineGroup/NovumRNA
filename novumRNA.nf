@@ -6,9 +6,12 @@ include {install_IEDB; Indices; OptiType; alignment; HLA_extraction; HLA_HD; Str
 
 
 workflow analysis {
+def raw_data = []
+if (params.input_fastq == "${params.input_ref}/samplesheet_CRC_fastq_sub.csv") {
+  raw_data.add([[ID:"Test_CRC01",libType:"PE"],["${params.input_ref}/AK11_CRC01_R1_combined_clean_rmdup.fastq", "${params.input_ref}/AK11_CRC01_R2_combined_clean_rmdup.fastq"],params.default_hla,"${params.input_ref}/HLA_class_II_default_alleles.txt"])
+}
+else {
   def batchCSV = file(params.input_fastq).splitCsv(header:true)
-
-  def raw_data = []
 
   for ( row in batchCSV ) {
       def meta  = [:]
@@ -36,28 +39,30 @@ workflow analysis {
         raw_data.last() << file(params.default_hla_II)
     }
   }
-  batch_raw_data_ch = Channel.fromList(raw_data)
-  install_IEDB(params.IEDB_MHCI_url, params.IEDB_MHCII_url, params.IEDB_check)
-  Indices(params.genome, params.hisat_index, params.star_index)
-  Protein_to_peptides(params.ref_proteome, params.Ref_pep, params.peptide_length)
-  OptiType(batch_raw_data_ch, params.HLA_ref)
-  alignment(params.genome, params.aligner, Indices.out[0], Indices.out[1], params.hisat_index, params.star_index, batch_raw_data_ch, params.two_pass, params.riboseq)  
-  HLA_extraction(alignment.out[0].join(batch_raw_data_ch))
-  HLA_HD(HLA_extraction.out.join(batch_raw_data_ch))
-  StringTie(alignment.out[0], params.reference_GTF)
-  Annotation(StringTie.out[0], params.tpm_min_novel, params.cov_min_novel, params.tpm_min_diff, params.cov_min_diff, params.capture_bed)
-  Translation(StringTie.out[0].join(Annotation.out[0]).transpose(), params.genome, params.reference_GTF, params.ref_proteome, params.peptide_length, params.split_anno_2)
-  Annotation_2(Translation.out[0].join(alignment.out[0]).transpose(), params.aligner, params.BAM_cov)
-  Combine(Annotation_2.out[0].join(Annotation_2.out[2]).groupTuple())
-  Translation_2(Combine.out[0].join(Translation.out[2]).join(Translation.out[3]).transpose())
-  Filtering(Translation_2.out[0], Protein_to_peptides.out, params.split_netMHCpan)
-  pVACbind_class_I(Filtering.out[1].join(OptiType.out).join(batch_raw_data_ch).transpose(by: 1), install_IEDB.out)
-  pVACbind_class_II(Filtering.out[3].join(HLA_HD.out).join(batch_raw_data_ch).transpose(by: 1), install_IEDB.out)
-  final_out_1(pVACbind_class_I.out.groupTuple())
-  final_out_2(pVACbind_class_II.out.groupTuple())
-  Metadata_MHCI(Filtering.out[0].join(StringTie.out[2]).join(Annotation.out[1]).join(Translation.out[8]).join(Combine.out[1]).join(Translation_2.out[1]).join(final_out_1.out).groupTuple().transpose(), params.Annotation_2)
-  Metadata_MHCII(Filtering.out[0].join(StringTie.out[2]).join(Annotation.out[1]).join(Translation.out[8]).join(Combine.out[1]).join(Translation_2.out[1]).join(final_out_2.out).groupTuple().transpose(), params.Annotation_2)
-  Rerun_samplesheet(batch_raw_data_ch.join(alignment.out[0]).join(StringTie.out[0]).join(StringTie.out[2]).join(OptiType.out).join(HLA_HD.out), params.outdir)
+}
+
+batch_raw_data_ch = Channel.fromList(raw_data)
+install_IEDB(params.IEDB_MHCI_url, params.IEDB_MHCII_url, params.IEDB_check)
+Indices(params.genome, params.hisat_index, params.star_index)
+Protein_to_peptides(params.ref_proteome, params.Ref_pep, params.peptide_length)
+OptiType(batch_raw_data_ch, params.HLA_ref)
+alignment(params.genome, params.aligner, Indices.out[0], Indices.out[1], params.hisat_index, params.star_index, batch_raw_data_ch, params.two_pass, params.riboseq)  
+HLA_extraction(alignment.out[0].join(batch_raw_data_ch))
+HLA_HD(HLA_extraction.out.join(batch_raw_data_ch))
+StringTie(alignment.out[0], params.reference_GTF)
+Annotation(StringTie.out[0], params.tpm_min_novel, params.cov_min_novel, params.tpm_min_diff, params.cov_min_diff, params.capture_bed)
+Translation(StringTie.out[0].join(Annotation.out[0]).transpose(), params.genome, params.reference_GTF, params.ref_proteome, params.peptide_length, params.split_anno_2)
+Annotation_2(Translation.out[0].join(alignment.out[0]).transpose(), params.aligner, params.BAM_cov)
+Combine(Annotation_2.out[0].join(Annotation_2.out[2]).groupTuple())
+Translation_2(Combine.out[0].join(Translation.out[2]).join(Translation.out[3]).transpose())
+Filtering(Translation_2.out[0], Protein_to_peptides.out, params.split_netMHCpan)
+pVACbind_class_I(Filtering.out[1].join(OptiType.out).join(batch_raw_data_ch).transpose(by: 1), install_IEDB.out)
+pVACbind_class_II(Filtering.out[3].join(HLA_HD.out).join(batch_raw_data_ch).transpose(by: 1), install_IEDB.out)
+final_out_1(pVACbind_class_I.out.groupTuple())
+final_out_2(pVACbind_class_II.out.groupTuple())
+Metadata_MHCI(Filtering.out[0].join(StringTie.out[2]).join(Annotation.out[1]).join(Translation.out[8]).join(Combine.out[1]).join(Translation_2.out[1]).join(final_out_1.out).groupTuple().transpose(), params.Annotation_2)
+Metadata_MHCII(Filtering.out[0].join(StringTie.out[2]).join(Annotation.out[1]).join(Translation.out[8]).join(Combine.out[1]).join(Translation_2.out[1]).join(final_out_2.out).groupTuple().transpose(), params.Annotation_2)
+Rerun_samplesheet(batch_raw_data_ch.join(alignment.out[0]).join(StringTie.out[0]).join(StringTie.out[2]).join(OptiType.out).join(HLA_HD.out), params.outdir)
 }
 
 workflow analysis_short {

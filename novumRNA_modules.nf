@@ -239,11 +239,21 @@ process 'Filtering' {
         cat $peptides_class_I > "${meta.ID}_peptides_I_reduced.fasta"
   fi
   
-  seqkit common -j ${task.cpus} -s "${meta.ID}_peptides_I_reduced.fasta" $database_I > "${meta.ID}_common_I_peptides.fasta"
+  mkdir split_fastas
+
+  awk '/^>/{s=\$0; next} {print s ORS \$0 > ("split_fastas/" length(\$0) ".fasta")}' $database_I
+
+  # Loop through each filtered fasta file and run seqkit common
+  for filtered_file in split_fastas/*.fasta; do
+    peptide_length=\$(basename "\$filtered_file" .fasta)
+    seqkit common -j ${task.cpus} -s "${meta.ID}_peptides_I_reduced.fasta" "\$filtered_file" > "${meta.ID}_\${peptide_length}_common_split.fasta"
+  done
+
+  cat *_common_split.fasta  > "${meta.ID}_common_I_peptides.fasta"
+
   seqkit grep -j ${task.cpus} -n -v -f <(seqkit seq -n "${meta.ID}_common_I_peptides.fasta") $peptides_class_I | seqkit rmdup -j ${task.cpus} > "${meta.ID}_peptides_I_filtered.fasta"
   grep -v ">" "${meta.ID}_peptides_I_filtered.fasta" > "${meta.ID}_peptides_I_filtered_paste.fasta"
   seqkit fx2tab "${meta.ID}_peptides_I_filtered.fasta" > "${meta.ID}_peptides_I_filtered.tsv"
-
   seqkit seq -m 1 -M 12 "${meta.ID}_peptides_I_filtered.fasta" > "${meta.ID}_peptides_MHCI_filtered.fasta"
   seqkit seq -m 13 -M 50 "${meta.ID}_peptides_I_filtered.fasta" > "${meta.ID}_peptides_MHCII_filtered.fasta"
 

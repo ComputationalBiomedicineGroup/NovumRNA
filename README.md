@@ -90,10 +90,6 @@ However, ```input_fastq``` the config file is already set to:
 
 This points to the testing data present in the resource bundle. As a first run, we recommend using the testing data, so maybe keep this unchanged for the first run and then set it to your own samplesheet for further runs. The testing data consists of downsampled, colorectal cancer organoid derived RNA-seq data.
 
-Within the samplesheet, you need to specify the exact paths to the input samples, this needs to be done also for the testing samples!
-For the testing data, go to the resource bundle directory, look for the samplesheet called “samplesheet_CRC_fastq_sub.csv” and specify the exact path to the test fastq files, which are present in the same directory. Please do the same also for the file “HLA_class_II_default_alleles.txt”, which contains class II HLA alleles to call class II ncnas in the test run, without relying on an HLA-HD installation.
-
-
 One more thing, depending on which scheduler you use, you need to define your scheduler parameters. This is done in so-called ```profiles```. Profiles are defined in the ```novumRNA.config``` file at the end. One is called singularity, you should leave this unchanged and always specify it for your runs (see Your first NovumRNA run). The profile called cluster defines how nextflow will submit the jobs, this depends on what scheduler you use. Modify these parameters: executor = 'slurm/sge/other' and clusterOptions = {#!/bin/bash … } or create your own profile.
 
 ## Usage: The csv samplesheet
@@ -135,7 +131,7 @@ nextflow run path/to/repo/novumRNA.nf -profile cluster,singularity -w /path/to/w
 Add “-resume” to your command, if something fails, and you need to re-run, the pipeline will take off at the last completed module, it will save you a lot of time!
 
 As mentioned before, NovumRNA will install the IEDB toolkit on your first run.
-After the first run, please go to the resource bundle directory, you will find that the “iedb” folder contains the installed scripts, but also a file called “iedb_install_ok.chck”. Specify the path to this file to ```IEDB_check``` in the novumRNA.config file, like this the IEDB toolkit won’t be installed once more in a next run.
+After the first run, please specifiy ```IEDB_check``` in the novumRNA.config file to ${params.input_ref}/iedb/iedb_install_ok.chck. Like this the IEDB toolkit won’t be installed once more in a next run.
 
 The default configurations in the novumRNA.config file will produce output:
 hisat2 as aligner with a hisat2 index provided in the resource bundle (add ```--aligner star``` to the command to change to STAR as aligner, index will be created).
