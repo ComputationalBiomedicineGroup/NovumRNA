@@ -10,7 +10,7 @@ https://docs.google.com/document/d/1daVnVVYiOqdg7k4tWqshV0k8CYCQY0EBeGUC1gW4W8g/
 And if you are interested in how individual modules exactly work, take a look at the supplementary material:
 TBA
 
-Happy predicting! 
+Happy predicting!
 
 ## Basic information about NovumRNA
 
@@ -22,7 +22,7 @@ In brief, NovumRNA takes single- or paired-end tumor RNA-seq FASTQ files as inpu
 
 NovumRNA is designed to run on a Linux based system.
 
-NovumRNA is implemented as nextflow dsl2 pipeline which runs based on singularity containers, so you need to have nextflow >= 23.04.2.5870 and singularity >=  3.8.7 already installed on your system. 
+NovumRNA is implemented as nextflow dsl2 pipeline which runs based on singularity containers, so you need to have nextflow >= 23.04.2.5870 and singularity >=  3.8.7 already installed on your system.
 
 If you don’t have them installed yet, the commands below may be used to install them.
  
@@ -70,16 +70,16 @@ Specifying the input, the output directory, changing references, aligner, or cut
 
 More info on that in the manual, but here are the most essential positions you need to specify to get you started:
 
-```input_ref``` = “path/to/resource/bundle” 
+```input_ref``` = “path/to/resource/bundle”
 Specify here the path to your downloaded and unpacked resource bundle.
 
-```novumrna``` = “path/to/novumra_git_repo” 
+```novumrna``` = “path/to/novumra_git_repo”
 Specify here the path to your cloned NovumRNA git repository.
 
-```outdir``` = “path/to/output_directory/” 
+```outdir``` = “path/to/output_directory/”
 Specify here the path to where you want to have the pipeline output. If the directory is not present, it will be automatically created.
 
-```input_fastq``` = “/path/to/input_samplesheet.csv” 
+```input_fastq``` = “/path/to/input_samplesheet.csv”
 Specify here the path to your own input_samplesheet.csv (see next section).
 
 However, ```input_fastq``` the config file is already set to:
@@ -103,7 +103,7 @@ ID,Read1,Read2,HLA_types,HLA_types_II
 If left empty, OptiType is run to predict the HLA class I alleles.
 * ```HLA_types_II```: A file containing already known HLA class II alleles, separated by commas, in this format: DPA1*01:03-DPB1*69:01,DRB1*15:13 (see “Valid_HLAII_alleles.txt” in the repo bin). If left empty, HLA-HD (if installed, like mentioned before) is run to predict the HLA class II alleles.
 
-Every samplesheet needs to have these headers with these exact names. 
+Every samplesheet needs to have these headers with these exact names.
 
 Here is how the samplesheet containing the testing data looks like:
 
@@ -118,12 +118,13 @@ As you can see, the column HLA_types can just be left empty, OptiType will run. 
 After you’ve set everything up in the config file and specified the paths in your own samplesheet, or the test samplesheet, run the pipeline from the command line like the following:
 
 ```
-nextflow run path/to/repo/novumRNA.nf -profile my_profile,singularity -w /path/to/work/  -c /path/to/repo/novumRNA.config -entry analysis
+nextflow run path/to/repo/novumRNA.nf -profile my_profile,singularity -w /path/to/work/  -c /path/to/repo/novumRNA.config -entry analysis --accept_licence
 ```
 * ```profile```: my_profile: your system specific scheduler options. singularity: options for singularity.
 * ```-w```: Your working directory, where intermediate results will be stored
 * ```-c```: Path to your novumRNA.config file
 *```-entry```: use ```analysis``` for the standard prediction, see manual for other options.
+*```--accept_licence```: By adding this to the command, you accept the licenses of all tools used by NovumRNA. This is only needs to be specified the very first run! If not specified on your first run, NovumRNA displays the license and asks you to specify ```--accept_licence```. The license can also be viewed in the resource bundle under ```LICENCE```.
 
 Add “-resume” to your command, if something fails, and you need to re-run, the pipeline will take off at the last completed module, it will save you a lot of time!
 
