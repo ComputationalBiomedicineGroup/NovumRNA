@@ -70,9 +70,6 @@ Specifying the input, the output directory, changing references, aligner, or cut
 
 More info on that in the manual, but here are the most essential positions you need to specify to get you started:
 
-Whenever you specify a path, make sure to use the realpath and no symlink!
-
-
 ```input_ref``` = “path/to/resource/bundle” 
 Specify here the path to your downloaded and unpacked resource bundle.
 
@@ -90,7 +87,7 @@ However, ```input_fastq``` the config file is already set to:
 
 This points to the testing data present in the resource bundle. As a first run, we recommend using the testing data, so maybe keep this unchanged for the first run and then set it to your own samplesheet for further runs. The testing data consists of downsampled, colorectal cancer organoid derived RNA-seq data.
 
-One more thing, depending on which scheduler you use, you need to define your scheduler parameters. This is done in so-called ```profiles```. Profiles are defined in the ```novumRNA.config``` file at the end. One is called singularity, you should leave this unchanged and always specify it for your runs (see Your first NovumRNA run). The profile called cluster defines how nextflow will submit the jobs, this depends on what scheduler you use. Modify these parameters: executor = 'slurm/sge/other' and clusterOptions = {#!/bin/bash … } or create your own profile.
+One more thing, depending on which scheduler you use, you need to define your scheduler parameters. This is done in so-called ```profiles```. Profiles are defined in the ```novumRNA.config``` file at the end. One is called singularity, you should leave this unchanged and always specify it for your runs (see Your first NovumRNA run). The profile called my_profile defines how nextflow will submit the jobs, this depends on what scheduler you use. Modify these parameters: executor = 'slurm/sge/other' and clusterOptions = {#!/bin/bash … } or use/modify the already built profiles defined for SGE and SLURM shedulers.
 
 ## Usage: The csv samplesheet
 
@@ -99,12 +96,12 @@ A samplesheet is a format to specify your input data, nowadays widely used with 
 The headers of this table consist of:
 ID,Read1,Read2,HLA_types,HLA_types_II
 
-* ID: Sample name, this ID will be used as output name
-* Read1: forward read (FASTQ or gzipped FASTQ)
-* Read2: reverse read (FASTQ or gzipped FASTQ, if left empty, single-end mode is used)
-* HLA_types: A file containing already known HLA class I alleles, separated by commas, in this format: HLA-A*01:01,HLA-C*05:25 (see “Valid_HLAI_alleles.txt” in the repo bin).
+* ```ID```: Sample name, this ID will be used as output name
+* ```Read1```: forward read (FASTQ or gzipped FASTQ)
+* ```Read2```: reverse read (FASTQ or gzipped FASTQ, if left empty, single-end mode is used)
+* ```HLA_types```: A file containing already known HLA class I alleles, separated by commas, in this format: HLA-A*01:01,HLA-C*05:25 (see “Valid_HLAI_alleles.txt” in the repo bin).
 If left empty, OptiType is run to predict the HLA class I alleles.
-* HLA_types_II: A file containing already known HLA class II alleles, separated by commas, in this format: DPA1*01:03-DPB1*69:01,DRB1*15:13 (see “Valid_HLAII_alleles.txt” in the repo bin). If left empty, HLA-HD (if installed, like mentioned before) is run to predict the HLA class II alleles.
+* ```HLA_types_II```: A file containing already known HLA class II alleles, separated by commas, in this format: DPA1*01:03-DPB1*69:01,DRB1*15:13 (see “Valid_HLAII_alleles.txt” in the repo bin). If left empty, HLA-HD (if installed, like mentioned before) is run to predict the HLA class II alleles.
 
 Every samplesheet needs to have these headers with these exact names. 
 
@@ -121,9 +118,9 @@ As you can see, the column HLA_types can just be left empty, OptiType will run. 
 After you’ve set everything up in the config file and specified the paths in your own samplesheet, or the test samplesheet, run the pipeline from the command line like the following:
 
 ```
-nextflow run path/to/repo/novumRNA.nf -profile cluster,singularity -w /path/to/work/  -c /path/to/repo/novumRNA.config -entry analysis
+nextflow run path/to/repo/novumRNA.nf -profile my_profile,singularity -w /path/to/work/  -c /path/to/repo/novumRNA.config -entry analysis
 ```
-* ```profile```: cluster: your system specific scheduler options. singularity: options for singularity.
+* ```profile```: my_profile: your system specific scheduler options. singularity: options for singularity.
 * ```-w```: Your working directory, where intermediate results will be stored
 * ```-c```: Path to your novumRNA.config file
 *```-entry```: use ```analysis``` for the standard prediction, see manual for other options.
@@ -185,9 +182,9 @@ TPM = Expression measurement, transcripts per million
 * Clone the NovumRNA repository
 * Download and unpack the resource bundle
 * In the config file, specify ```input_ref```, ```novumrna```, ```outdir``` and ```input_fastq```
-* Set the paths to the testing files in the test samplesheet
-* Adapt profile ```cluster``` to your system's scheduler
-* Run with: nextflow run path/to/repo/novumRNA.nf -profile cluster,singularity -w /path/to/work/  -c /path/to/repo/novumRNA.config -entry analysis
+* Use test data or create your own samplesheet
+* Adapt profile ```my_profile``` to your system's scheduler, or use pre-built
+* Run with: nextflow run path/to/repo/novumRNA.nf -profile my_profile,singularity -w /path/to/work/  -c /path/to/repo/novumRNA.config -entry analysis
 * Set  “IEDB_check” in the config to path to “iedb_install_ok.chck”
 
 ## We hope it worked!
