@@ -6,6 +6,17 @@ include {install_IEDB; Indices; OptiType; alignment; HLA_extraction; HLA_HD; Str
 
 
 workflow analysis {
+
+// Check if License(s) were accepted
+params.accept_license = false
+params.licence        = "${params.input_ref}/LICENCE"
+
+if (params.accept_license) {
+    acceptLicense()
+} else {
+    checkLicense()
+}
+
 def raw_data = []
 if (params.input_fastq == "${params.input_ref}/samplesheet_CRC_fastq_sub.csv") {
   raw_data.add([[ID:"Test_CRC01",libType:"PE"],["${params.input_ref}/AK11_CRC01_R1_combined_clean_rmdup.fastq", "${params.input_ref}/AK11_CRC01_R2_combined_clean_rmdup.fastq"],params.default_hla,"${params.input_ref}/HLA_class_II_default_alleles.txt"])
@@ -185,4 +196,37 @@ workflow capture_bed_short {
               .splitCsv(header: false, sep:',')
               
   Create_capture_bed(input_ch_capture_gtf.collect(), params.tpm_max_diff, params.cov_max_diff, params.genome_length)
+}
+
+def showLicense() {
+
+    licenseFile = file(params.licence)
+    log.info licenseFile.text
+
+    log.info ""
+    log.warn "To accept the licence terms, please rerun with '--accept_license'"
+    log.info ""
+
+    exit 1
+}
+
+def acceptLicense() {
+    log.info ""
+    log.warn "I have read and accept the licence terms"
+    log.info ""
+
+    licenseChckFile = file("${params.input_ref}/.license_accepted.chck")
+    licenseChckFile.text = "License accepted"
+
+    return true
+}
+
+def checkLicense() {
+    licenseChckFile = file("${params.input_ref}/.license_accepted.chck")
+
+    if(!licenseChckFile.exists()) {
+        showLicense()
+    } else {
+        return true
+    }
 }
