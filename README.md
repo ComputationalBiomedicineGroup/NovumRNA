@@ -30,7 +30,7 @@ If you don’t have them installed yet, the commands below may be used to instal
 curl -s https://get.nextflow.io | bash
 curl -s https://get.singularity.io | bash
 ```
-Or, if you have conda available, consider creating a dedicated Conda environment and install it there:
+Or, if you have conda available, consider creating a dedicated conda environment and install it there:
 
 ```
 conda create -n novumRNA
@@ -111,20 +111,20 @@ Here is how the samplesheet containing the testing data looks like:
 ID,Read1,Read2,HLA_types,HLA_types_II
 AK11_CRC01,AK11_CRC01_R1_combined_clean_rmdup.fastq,AK11_CRC01_R2_combined_clean_rmdup.fastq,,HLA_class_II_default_alleles.txt
 ```
-As you can see, the column HLA_types can just be left empty, OptiType will run. For your test run, please specify the full path to these samples, all present in the resource bundle.
+As you can see, the column HLA_types can just be left empty, OptiType will run.
 
 ## Your first NovumRNA run
 
 After you’ve set everything up in the config file and specified the paths in your own samplesheet, or the test samplesheet, run the pipeline from the command line like the following:
 
 ```
-nextflow run path/to/repo/novumRNA.nf -profile my_profile,singularity -w /path/to/work/  -c /path/to/repo/novumRNA.config -entry analysis --accept_licence
+nextflow run path/to/repo/novumRNA.nf -profile my_profile,singularity -w /path/to/work/  -c /path/to/repo/novumRNA.config -entry analysis --accept_license
 ```
 * ```profile```: my_profile: your system specific scheduler options. singularity: options for singularity.
 * ```-w```: Your working directory, where intermediate results will be stored
 * ```-c```: Path to your novumRNA.config file
 *```-entry```: use ```analysis``` for the standard prediction, see manual for other options.
-*```--accept_licence```: By adding this to the command, you accept the licenses of all tools used by NovumRNA. This is only needs to be specified the very first run! If not specified on your first run, NovumRNA displays the license and asks you to specify ```--accept_licence```. The license can also be viewed in the resource bundle under ```LICENCE```.
+*```--accept_license```: By adding this to the command, you accept the licenses of all tools used by NovumRNA. This is only needs to be specified the very first run! If not specified on your first run, NovumRNA displays the license and asks you to specify ```--accept_license```. The license can also be viewed in the resource bundle under ```license```.
 
 Add “-resume” to your command, if something fails, and you need to re-run, the pipeline will take off at the last completed module, it will save you a lot of time!
 

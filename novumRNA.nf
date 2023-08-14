@@ -9,7 +9,7 @@ workflow analysis {
 
 // Check if License(s) were accepted
 params.accept_license = false
-params.licence        = "${params.input_ref}/LICENCE"
+params.license        = "${params.input_ref}/LICENSE"
 
 if (params.accept_license) {
     acceptLicense()
@@ -200,11 +200,11 @@ workflow capture_bed_short {
 
 def showLicense() {
 
-    licenseFile = file(params.licence)
+    licenseFile = file(params.license)
     log.info licenseFile.text
 
     log.info ""
-    log.warn "To accept the licence terms, please rerun with '--accept_license'"
+    log.warn "To accept the license terms, please rerun with '--accept_license'"
     log.info ""
 
     exit 1
@@ -212,7 +212,7 @@ def showLicense() {
 
 def acceptLicense() {
     log.info ""
-    log.warn "I have read and accept the licence terms"
+    log.warn "I have read and accept the license terms"
     log.info ""
 
     licenseChckFile = file("${params.input_ref}/.license_accepted.chck")
