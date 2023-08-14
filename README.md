@@ -74,13 +74,13 @@ Whenever you specify a path, make sure to use the realpath and no symlink!
 
 
 ```input_ref``` = “path/to/resource/bundle” 
-Specify here the path to your downloaded and unpacked resource bundle. Please do not add a “/” at the end.
+Specify here the path to your downloaded and unpacked resource bundle.
 
 ```novumrna``` = “path/to/novumra_git_repo” 
-Specify here the path to your cloned NovumRNA git repository. Once more, please do not add a “/” at the end.
+Specify here the path to your cloned NovumRNA git repository.
 
 ```outdir``` = “path/to/output_directory/” 
-Specify here the path to where you want to have the pipeline output. If the directory is not present, it will be automatically created. Surprise! This time, please add a “/” at the end.
+Specify here the path to where you want to have the pipeline output. If the directory is not present, it will be automatically created.
 
 ```input_fastq``` = “/path/to/input_samplesheet.csv” 
 Specify here the path to your own input_samplesheet.csv (see next section).
