@@ -140,7 +140,7 @@ workflow analysis_short {
   Protein_to_peptides(params.ref_proteome, params.Ref_pep, params.peptide_length)
   Annotation(batch_raw_data_ch_GTF, params.tpm_min_novel, params.cov_min_novel, params.tpm_min_diff, params.cov_min_diff, params.capture_bed)
   Translation(batch_raw_data_ch_GTF.join(Annotation.out[0]).transpose(), params.genome, params.reference_GTF, params.ref_proteome, params.peptide_length, params.split_anno_2)
-  Annotation_2(Translation.out[0].join(batch_raw_data_ch_BAM).transpose(), params.aligner, params.BAM_cov)
+  Annotation_2(Translation.out[0].join(batch_raw_data_ch_BAM).transpose(by: 1), params.aligner, params.BAM_cov)
   Combine(Annotation_2.out[0].join(Annotation_2.out[2]).groupTuple())
   Translation_2(Combine.out[0].join(Translation.out[2]).join(Translation.out[3]).transpose())
   Filtering(Translation_2.out[0], Protein_to_peptides.out, params.split_netMHCpan)

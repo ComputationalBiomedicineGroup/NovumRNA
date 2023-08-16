@@ -87,7 +87,7 @@ def get_matching(Input):
     aa_seqs2 = ','.join(str(v) for v in aa_seqs)
     aa_seqs2 = aa_seqs2.split(',')
     aa_seqs2 = list(filter(None, aa_seqs2))
-    if Input.Transcript_ref != "None":
+    if Input.Transcript_ref != "No_ref":
         Merged = list(itertools.product(aa_seqs2, [Input.Ref_protein]))
         Test_4 = pd.DataFrame(map(get_overlap, Merged))
         Test_max = Test_4[Test_4[2]==Test_4[2].max()]
@@ -165,9 +165,9 @@ def closest_value(Input):
   Test_2 = Test_1["ID"].iloc[0]
   Diff = Input[3] - abs(arr[i])
   if (abs(Diff) <= 50) & (Test_1["Protein"].iloc[0] != "NONE"):
-            Confidence = "Protein"
+            Confidence = "Protein_ref"
   elif (abs(Diff) > 50) & (Test_1["Protein"].iloc[0] != "NONE"):
-            Confidence = "None"        
+            Confidence = "No_ref"        
   return [Input[3], Input["Sequence"], Test_1[3].iloc[0], Test_1[6].iloc[0], Test_1["Protein"].iloc[0], Diff, Name, Test_2, Confidence]
 
 seq_dict = {}
