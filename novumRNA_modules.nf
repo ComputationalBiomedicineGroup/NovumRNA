@@ -158,7 +158,7 @@ process 'StringTie' {
 
   script:
   """
-  stringtie -p ${task.cpus} -o "${meta.ID}_stringtie.gtf" $bam -G $reference_gtf
+  stringtie -p 1 -o "${meta.ID}_stringtie.gtf" $bam -G $reference_gtf
   python3 /scripts/rename_stringtie.py --stringtie_out "${meta.ID}_stringtie.gtf" --gtf_out "${meta.ID}_stringtie_renamed.gtf" --vaf_out "${meta.ID}_vaf.tsv"
   """
 }
@@ -392,7 +392,7 @@ process 'Translation' {
   """
 }
 
-process 'Annotation' {
+process 'Capture_regions' {
   errorStrategy 'ignore'
 
   input:
@@ -415,7 +415,7 @@ process 'Annotation' {
   """
 }
 
-process 'Annotation_2' {
+process 'BAM_coverage' {
   errorStrategy 'ignore'
 
   input:
@@ -559,7 +559,7 @@ process 'pVACbind_class_II' {
     """
 }
 
-process 'final_out_1' {
+process 'Collect_binding' {
   errorStrategy 'ignore'
 
   input: 
@@ -574,7 +574,7 @@ process 'final_out_1' {
     """
 }
 
-process 'Metadata_MHCI' {
+process 'Final_MHCI' {
   errorStrategy 'ignore'
 
   input: 
@@ -582,17 +582,17 @@ process 'Metadata_MHCI' {
   path (anno_2)
     
   output:
-  tuple val(meta), path ("${meta.ID}_final_out_combined.tsv")
+  tuple val(meta), path ("${meta.ID}_final_class_I_prediction.tsv")
     
   script:
     """
   /scripts/final_out_2.py --Filtering $filtering --VAF $vaf --BED $bed --Translation $translation --BED_2 $bed_2 --Specific $specific --BIND $bind --Out "${meta.ID}_final_out_combined_1.tsv" --Out_header "${meta.ID}_final_out_combined_0.tsv"
   /bedtools2/bin/bedtools intersect -wao -s -a "${meta.ID}_final_out_combined_1.tsv" -b $anno_2 > "${meta.ID}_final_out_combined_2.tsv"
-  /scripts/final_out_1.py --BED "${meta.ID}_final_out_combined_2.tsv" --BED_old "${meta.ID}_final_out_combined_0.tsv" --Out "${meta.ID}_final_out_combined.tsv"
+  /scripts/final_out_1.py --BED "${meta.ID}_final_out_combined_2.tsv" --BED_old "${meta.ID}_final_out_combined_0.tsv" --Out "${meta.ID}_final_class_I_prediction.tsv"
     """
 }
 
-process 'Metadata_MHCII' {
+process 'Final_MHCII' {
   errorStrategy 'ignore'
 
   input: 
@@ -600,18 +600,18 @@ process 'Metadata_MHCII' {
   path (anno_2)
     
   output:
-  tuple val(meta), path ("${meta.ID}_final_out_combined.tsv")
+  tuple val(meta), path ("${meta.ID}_final_class_II_prediction.tsv")
     
   script:
     """
   /scripts/final_out_2.py --Filtering $filtering --VAF $vaf --BED $bed --Translation $translation --BED_2 $bed_2 --Specific $specific --BIND $bind --Out "${meta.ID}_final_out_combined_1.tsv" --Out_header "${meta.ID}_final_out_combined_0.tsv"
   /bedtools2/bin/bedtools intersect -wao -s -a "${meta.ID}_final_out_combined_1.tsv" -b $anno_2 > "${meta.ID}_final_out_combined_2.tsv"
-  /scripts/final_out_1.py --BED "${meta.ID}_final_out_combined_2.tsv" --BED_old "${meta.ID}_final_out_combined_0.tsv" --Out "${meta.ID}_final_out_combined.tsv"
+  /scripts/final_out_1.py --BED "${meta.ID}_final_out_combined_2.tsv" --BED_old "${meta.ID}_final_out_combined_0.tsv" --Out "${meta.ID}_final_class_II_prediction.tsv"
     """
 }
 
 
-process 'final_out_2' {
+process 'Collect_binding_II' {
   errorStrategy 'ignore'
 
   input: 

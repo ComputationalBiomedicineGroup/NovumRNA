@@ -106,5 +106,9 @@ def switch_2(Input):
 
 Final_5 = Final_4.apply(switch_2, axis=1)
 
+Final_5["E_coverage"] = round(Final_5["E_coverage"], 1)
+Final_5["Overlap_perc"] = round(Final_5["Overlap_perc"], 1)
+Final_5["TPM"] = round(Final_5["TPM"], 2)
+
 Final_5.to_csv(args.Out, sep="\t", index=False, header = None)
 Final_5.to_csv(args.Out_header, sep="\t", index=False)

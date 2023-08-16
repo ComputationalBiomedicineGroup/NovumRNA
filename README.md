@@ -138,7 +138,7 @@ Class II ncnas of length 15 aas, based on provided HLA class II alleles in the s
 
 ## Output explanation
 
-All results can be found in the ```outdir``` directory you specified in the config. You can find results from each module there, the final list of ncnas is present in the file ```yourID_final_out_combined.tsv file```. One in the output folder ```Metadata_MHCI``` for class I and one in ```Metadata_MHCII``` for class II.
+All results can be found in the ```outdir``` directory you specified in the config. You can find results from each module there, the final list of ncnas is present in the file ```yourID_final_class_I_prediction.tsv``` in the output folder ```Final_MHCI``` for class I and ```yourID_final_class_II_prediction.tsv``` in the output folder ```Final_MHCII``` for class II.
 
 Only the IEDB installation, your own built indices (optional) and peptide references (optional) will appear in the resource bundle directory, more on this in the manual.
 

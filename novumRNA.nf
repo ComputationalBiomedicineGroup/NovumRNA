@@ -2,7 +2,7 @@
 
 nextflow.enable.dsl=2
 
-include {install_IEDB; Indices; OptiType; alignment; HLA_extraction; HLA_HD; StringTie; Create_capture_bed; Protein_to_peptides; Filtering; Translation; Translation_2; Annotation; Annotation_2; pVACbind_class_I; pVACbind_class_II; Metadata_MHCI; Metadata_MHCII; Combine; final_out_1; final_out_2; Rerun_samplesheet} from "./novumRNA_modules.nf"
+include {install_IEDB; Indices; OptiType; alignment; HLA_extraction; HLA_HD; StringTie; Create_capture_bed; Protein_to_peptides; Filtering; Translation; Translation_2; Capture_regions; BAM_coverage; pVACbind_class_I; pVACbind_class_II; Final_MHCI; Final_MHCII; Combine; Collect_binding; Collect_binding_II; Rerun_samplesheet} from "./novumRNA_modules.nf"
 
 
 workflow analysis {
@@ -61,18 +61,18 @@ alignment(params.genome, params.aligner, Indices.out[0], Indices.out[1], params.
 HLA_extraction(alignment.out[0].join(batch_raw_data_ch))
 HLA_HD(HLA_extraction.out.join(batch_raw_data_ch))
 StringTie(alignment.out[0], params.reference_GTF)
-Annotation(StringTie.out[0], params.tpm_min_novel, params.cov_min_novel, params.tpm_min_diff, params.cov_min_diff, params.capture_bed)
-Translation(StringTie.out[0].join(Annotation.out[0]).transpose(), params.genome, params.reference_GTF, params.ref_proteome, params.peptide_length, params.split_anno_2)
-Annotation_2(Translation.out[0].join(alignment.out[0]).transpose(), params.aligner, params.BAM_cov)
-Combine(Annotation_2.out[0].join(Annotation_2.out[2]).groupTuple())
+Capture_regions(StringTie.out[0], params.tpm_min_novel, params.cov_min_novel, params.tpm_min_diff, params.cov_min_diff, params.capture_bed)
+Translation(StringTie.out[0].join(Capture_regions.out[0]).transpose(), params.genome, params.reference_GTF, params.ref_proteome, params.peptide_length, params.split_BAM_coverage)
+BAM_coverage(Translation.out[0].join(alignment.out[0]).transpose(), params.aligner, params.BAM_cov)
+Combine(BAM_coverage.out[0].join(BAM_coverage.out[2]).groupTuple())
 Translation_2(Combine.out[0].join(Translation.out[2]).join(Translation.out[3]).transpose())
-Filtering(Translation_2.out[0], Protein_to_peptides.out, params.split_netMHCpan)
+Filtering(Translation_2.out[0], Protein_to_peptides.out, params.split_pVACbind)
 pVACbind_class_I(Filtering.out[1].join(OptiType.out).join(batch_raw_data_ch).transpose(by: 1), install_IEDB.out)
 pVACbind_class_II(Filtering.out[3].join(HLA_HD.out).join(batch_raw_data_ch).transpose(by: 1), install_IEDB.out)
-final_out_1(pVACbind_class_I.out.groupTuple())
-final_out_2(pVACbind_class_II.out.groupTuple())
-Metadata_MHCI(Filtering.out[0].join(StringTie.out[2]).join(Annotation.out[1]).join(Translation.out[8]).join(Combine.out[1]).join(Translation_2.out[1]).join(final_out_1.out).groupTuple().transpose(), params.Annotation_2)
-Metadata_MHCII(Filtering.out[0].join(StringTie.out[2]).join(Annotation.out[1]).join(Translation.out[8]).join(Combine.out[1]).join(Translation_2.out[1]).join(final_out_2.out).groupTuple().transpose(), params.Annotation_2)
+Collect_binding(pVACbind_class_I.out.groupTuple())
+Collect_binding_II(pVACbind_class_II.out.groupTuple())
+Final_MHCI(Filtering.out[0].join(StringTie.out[2]).join(Capture_regions.out[1]).join(Translation.out[8]).join(Combine.out[1]).join(Translation_2.out[1]).join(Collect_binding.out).groupTuple().transpose(), params.Annotation_2)
+Final_MHCII(Filtering.out[0].join(StringTie.out[2]).join(Capture_regions.out[1]).join(Translation.out[8]).join(Combine.out[1]).join(Translation_2.out[1]).join(Collect_binding_II.out).groupTuple().transpose(), params.Annotation_2)
 Rerun_samplesheet(batch_raw_data_ch.join(alignment.out[0]).join(StringTie.out[0]).join(StringTie.out[2]).join(OptiType.out).join(HLA_HD.out), params.outdir)
 }
 
@@ -138,18 +138,18 @@ workflow analysis_short {
 
   install_IEDB(params.IEDB_MHCI_url, params.IEDB_MHCII_url, params.IEDB_check)
   Protein_to_peptides(params.ref_proteome, params.Ref_pep, params.peptide_length)
-  Annotation(batch_raw_data_ch_GTF, params.tpm_min_novel, params.cov_min_novel, params.tpm_min_diff, params.cov_min_diff, params.capture_bed)
-  Translation(batch_raw_data_ch_GTF.join(Annotation.out[0]).transpose(), params.genome, params.reference_GTF, params.ref_proteome, params.peptide_length, params.split_anno_2)
-  Annotation_2(Translation.out[0].join(batch_raw_data_ch_BAM).transpose(by: 1), params.aligner, params.BAM_cov)
-  Combine(Annotation_2.out[0].join(Annotation_2.out[2]).groupTuple())
+  Capture_regions(batch_raw_data_ch_GTF, params.tpm_min_novel, params.cov_min_novel, params.tpm_min_diff, params.cov_min_diff, params.capture_bed)
+  Translation(batch_raw_data_ch_GTF.join(Capture_regions.out[0]).transpose(), params.genome, params.reference_GTF, params.ref_proteome, params.peptide_length, params.split_BAM_coverage)
+  BAM_coverage(Translation.out[0].join(batch_raw_data_ch_BAM).transpose(by: 1), params.aligner, params.BAM_cov)
+  Combine(BAM_coverage.out[0].join(BAM_coverage.out[2]).groupTuple())
   Translation_2(Combine.out[0].join(Translation.out[2]).join(Translation.out[3]).transpose())
-  Filtering(Translation_2.out[0], Protein_to_peptides.out, params.split_netMHCpan)
+  Filtering(Translation_2.out[0], Protein_to_peptides.out, params.split_pVACbind)
   pVACbind_class_I(Filtering.out[1].join(batch_raw_data_ch_OPTI).join(batch_raw_data_ch).join(batch_raw_data_ch_HLA_types).join(batch_raw_data_ch_HLA_types_II).transpose(by: 1), install_IEDB.out)
   pVACbind_class_II(Filtering.out[3].join(batch_raw_data_ch_HLAHD).join(batch_raw_data_ch).join(batch_raw_data_ch_HLA_types).join(batch_raw_data_ch_HLA_types_II).transpose(by: 1), install_IEDB.out)
-  final_out_1(pVACbind_class_I.out.groupTuple())
-  final_out_2(pVACbind_class_II.out.groupTuple())
-  Metadata_MHCI(Filtering.out[0].join(batch_raw_data_ch_VAF).join(Annotation.out[1]).join(Translation.out[8]).join(Combine.out[1]).join(Translation_2.out[1]).join(final_out_1.out).groupTuple().transpose(), params.Annotation_2)
-  Metadata_MHCII(Filtering.out[0].join(batch_raw_data_ch_VAF).join(Annotation.out[1]).join(Translation.out[8]).join(Combine.out[1]).join(Translation_2.out[1]).join(final_out_2.out).groupTuple().transpose(), params.Annotation_2)
+  Collect_binding(pVACbind_class_I.out.groupTuple())
+  Collect_binding_II(pVACbind_class_II.out.groupTuple())
+  Final_MHCI(Filtering.out[0].join(batch_raw_data_ch_VAF).join(Capture_regions.out[1]).join(Translation.out[8]).join(Combine.out[1]).join(Translation_2.out[1]).join(Collect_binding.out).groupTuple().transpose(), params.Annotation_2)
+  Final_MHCII(Filtering.out[0].join(batch_raw_data_ch_VAF).join(Capture_regions.out[1]).join(Translation.out[8]).join(Combine.out[1]).join(Translation_2.out[1]).join(Collect_binding_II.out).groupTuple().transpose(), params.Annotation_2)
 }
 
 workflow capture_bed {
