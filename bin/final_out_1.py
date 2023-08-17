@@ -16,4 +16,7 @@ names.append("Annotation_2")
 names.append("NT_Overlap_2")
 Final_anno.columns = names
 #Final_anno = Final_anno.drop_duplicates(["Chr", "Peptide_START", "Peptide_STOP", "Transcript"])
+Final_anno["E_Coverage"] = round(Final_anno["E_Coverage"], 1)
+Final_anno["Overlap_perc"] = round(Final_anno["Overlap_perc"], 1)
+Final_anno["TPM"] = round(Final_anno["TPM"], 2)
 Final_anno.to_csv(args.Out, sep="\t", index=False)

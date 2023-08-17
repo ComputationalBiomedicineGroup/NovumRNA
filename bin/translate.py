@@ -25,6 +25,7 @@ parser.add_argument('--Bed_out', type=str)
 parser.add_argument('--Overlaps_out', type=str)
 parser.add_argument('--Peptides_out', type=str)
 parser.add_argument('--Regions_fasta', type=str)
+parser.add_argument('--Ref_range', type=int)
 args = parser.parse_args()
 
 GTF_07H103 = pd.read_csv(args.Short_GTF, sep='\t', header=None)
@@ -164,9 +165,9 @@ def closest_value(Input):
   Test_1 = GTF_strand[GTF_strand[3] == arr[i]]
   Test_2 = Test_1["ID"].iloc[0]
   Diff = Input[3] - abs(arr[i])
-  if (abs(Diff) <= 50) & (Test_1["Protein"].iloc[0] != "NONE"):
+  if (abs(Diff) <= args.Ref_range) & (Test_1["Protein"].iloc[0] != "NONE"):
             Confidence = "Protein_ref"
-  elif (abs(Diff) > 50) & (Test_1["Protein"].iloc[0] != "NONE"):
+  elif (abs(Diff) > args.Ref_range) & (Test_1["Protein"].iloc[0] != "NONE"):
             Confidence = "No_ref"        
   return [Input[3], Input["Sequence"], Test_1[3].iloc[0], Test_1[6].iloc[0], Test_1["Protein"].iloc[0], Diff, Name, Test_2, Confidence]
 

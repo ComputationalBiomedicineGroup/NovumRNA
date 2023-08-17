@@ -352,6 +352,7 @@ process 'Translation' {
       path (ref_prot)
       val peptide_length
       val(split)
+      val(ref_range)
     
   output:
       tuple val (meta), path ("${meta.ID}_peptide_regions.split.bed0*")
@@ -380,7 +381,7 @@ process 'Translation' {
 
   /scripts/translate.py --Short_GTF "${meta.ID}_stringtie_short.gtf" --Stringtie_tsv "${meta.ID}_stringtie.tsv" \
   --Gencode_GTF $gtf --Reference_tsv gencode.v38.pc_translations.tsv \
-  --closest_out "${meta.ID}_closest_reference.tsv" --matching_out "${meta.ID}_translated.tsv" --Regions_bed "${meta.ID}_overlap_clean.bed" --peptide_length $peptide_length --Bed_out "${meta.ID}_peptide_regions.bed" --Overlaps_out "${meta.ID}_overlaps.tsv" --Regions_fasta "${meta.ID}_regions.fasta" --Peptides_out "${meta.ID}_peptides.fasta"
+  --closest_out "${meta.ID}_closest_reference.tsv" --matching_out "${meta.ID}_translated.tsv" --Regions_bed "${meta.ID}_overlap_clean.bed" --peptide_length $peptide_length --Bed_out "${meta.ID}_peptide_regions.bed" --Overlaps_out "${meta.ID}_overlaps.tsv" --Regions_fasta "${meta.ID}_regions.fasta" --Peptides_out "${meta.ID}_peptides.fasta" --Ref_range $ref_range
   
   seqkit sort -n -i "${meta.ID}_peptides.fasta" > "${meta.ID}_peptides_class_sorted.fasta"
 
