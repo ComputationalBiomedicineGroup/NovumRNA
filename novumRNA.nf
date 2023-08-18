@@ -185,7 +185,7 @@ workflow capture_bed {
     }
   batch_raw_data_ch = Channel.fromList(raw_data)
   Indices(params.genome, params.hisat_index, params.star_index)
-  alignment(params.genome, params.aligner, Indices.out[2], Indices.out[3], params.hisat_index, params.star_index, batch_raw_data_ch, params.two_pass, params.riboseq)  
+  alignment(params.genome, params.aligner, Indices.out[0], Indices.out[1], params.hisat_index, params.star_index, batch_raw_data_ch, params.two_pass, params.riboseq)  
   StringTie(alignment.out[0], params.reference_GTF)
   Create_capture_bed(StringTie.out[1].collect(), params.tpm_max_diff, params.cov_max_diff, params.genome_length)
 }
