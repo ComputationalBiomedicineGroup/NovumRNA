@@ -123,8 +123,8 @@ nextflow run path/to/repo/novumRNA.nf -profile my_profile,singularity -w /path/t
 * ```profile```: my_profile: your system specific scheduler options. singularity: options for singularity.
 * ```-w```: Your working directory, where intermediate results will be stored
 * ```-c```: Path to your novumRNA.config file
-*```-entry```: use ```analysis``` for the standard prediction, see manual for other options.
-*```--accept_license```: By adding this to the command, you accept the licenses of all tools used by NovumRNA. This is only needs to be specified the very first run! If not specified on your first run, NovumRNA displays the license and asks you to specify ```--accept_license```. The license can also be viewed in the resource bundle under ```license```.
+* ```-entry```: use ```analysis``` for the standard prediction, see manual for other options.
+* ```--accept_license```: By adding this to the command, you accept the licenses of all tools used by NovumRNA. This is only needs to be specified the very first run! If not specified on your first run, NovumRNA displays the license and asks you to specify ```--accept_license```. The license can also be viewed in the resource bundle under ```license```.
 
 Add “-resume” to your command, if something fails, and you need to re-run, the pipeline will take off at the last completed module, it will save you a lot of time!
 
@@ -186,7 +186,7 @@ TPM = Expression measurement, transcripts per million
 * Use test data or create your own samplesheet
 * Adapt profile ```my_profile``` to your system's scheduler, or use pre-built
 * Run with: nextflow run path/to/repo/novumRNA.nf -profile my_profile,singularity -w /path/to/work/  -c /path/to/repo/novumRNA.config -entry analysis
-* Set  “IEDB_check” in the config to path to “iedb_install_ok.chck”
+* Set  “IEDB_check” in the config to path to “${params.input_ref}/iedb/iedb_install_ok.chck”
 
 ## We hope it worked!
 Following this small guide, we hope you have now a basic understanding how things work with NovumRNA and you should hopefully been able to run the tool using the provided test data, or your own data. If you are interested in using all the features of NovumRNA and learn more how to adapt it to your needs, read the official manual:

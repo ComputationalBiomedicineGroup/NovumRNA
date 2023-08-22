@@ -271,7 +271,7 @@ process 'Create_capture_bed' {
       path(genome_length)
 
   output:
-      tuple path ("capture_bed.bed"), path ("All.gtf"), path ("capture_bed_differential.bed"), path ("capture_bed_novel.bed")
+      tuple path ("capture_bed.bed"), path ("capture_bed_differential.bed"), path ("capture_bed_novel.bed")
 
   script:
   """
@@ -310,6 +310,8 @@ process 'Create_capture_bed' {
   /scripts/capture_bed_differential_2.py --BED All_capture_differential_1_merged.bed --tpm_max_diff $tpm_max_diff --cov_max_diff $cov_max_diff --Out capture_bed_differential.bed
 
   cat capture_bed_novel.bed capture_bed_differential.bed > capture_bed.bed
+  
+  rm All.gtf
   """
 }
 
