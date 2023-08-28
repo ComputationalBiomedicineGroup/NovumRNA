@@ -77,6 +77,28 @@ process 'Indices' {
     """
 }
 
+process 'Unzip' {
+
+  errorStrategy 'ignore'
+
+  input: 
+  tuple val(meta), path(fastq), path(HLA_types_I), path(HLA_types_II)
+
+  output:
+  tuple val(meta), path("*.fastq"), path(HLA_types_I), path(HLA_types_II)
+    
+  script:
+ """
+  for fq in $fastq; do
+    if [[ "\$fq" == *.gz ]]; then
+      gunzip -f "\$fq"
+    fi
+  done
+
+ """
+
+}
+
 process 'OptiType' {
 
   errorStrategy 'ignore'
@@ -123,7 +145,6 @@ process 'alignment' {
   // Check if genomeDir is provided and not empty
     def index_star = (given_star_index != "") ? given_star_index : "star_index/"
     def index_hisat = (given_hisat_index != "") ? given_hisat_index : "hisat_genome_index/hisat_index"
-    def zcat = (fastq[0].getExtension() == "gz") ? "--readFilesCommand zcat" : ""
     reads_star = (meta.libType == "PE") ? fastq[0] + " " + fastq[1] : fastq
     reads_hisat = (meta.libType == "PE") ? "-1 " + fastq[0] + " -2 " + fastq[1] : fastq
     def two_pass =  two_pass ? "--twopassMode Basic" : ""
@@ -135,7 +156,7 @@ process 'alignment' {
     else
       /STAR-2.7.9a/source/STAR \
       --runMode alignReads --runThreadN ${task.cpus} --genomeDir $index_star \
-      --readFilesIn $reads_star ${two_pass} --outReadsUnmapped Fastx ${zcat} --outSAMtype BAM Unsorted --outSAMstrandField intronMotif ${riboseq}
+      --readFilesIn $reads_star ${two_pass} --outReadsUnmapped Fastx --outSAMtype BAM Unsorted --outSAMstrandField intronMotif ${riboseq}
 
       samtools sort -@ ${task.cpus} -m 4G -o "${meta.ID}_Aligned.sortedByCoord.out.bam" Aligned.out.bam
       samtools index "${meta.ID}_Aligned.sortedByCoord.out.bam"
@@ -230,7 +251,7 @@ process 'Filtering' {
 
   script:
   """
-  grep "Differential" $peptides_class_I || true > "${meta.ID}_Differential.fasta"
+  grep "Differential" $peptides_class_I > "${meta.ID}_Differential.fasta" || true
   if [ -s "${meta.ID}_Differential.fasta" ]; then
         # The file is not-empty.
         seqkit grep -j ${task.cpus} -n -v -f <(seqkit seq -n "${meta.ID}_Differential.fasta") $peptides_class_I > "${meta.ID}_peptides_I_reduced.fasta"

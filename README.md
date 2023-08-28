@@ -53,7 +53,7 @@ git clone git@github.com:ausserh/NovumRNA.git
 2) Download the NovumRNA resource bundle, containing the singularity containers, various reference files, testing data and many things more. The archive is 9 GB in size, when uncompressed it will increase to 16 GB, so make sure to have enough space.
 
 ```
-wget TBA
+wget -O "NovumRNA_resource_bundle.tar.gz" https://fileshare.uibk.ac.at/f/e9ac13c6822a4fc88c39/?dl=1
 tar -xzvf NovumRNA_resource_bundle.tar.gz
 ```
 Did I say everything is already installed in the containers? Well, almost. Due to license restrictions, NovumRNA will install parts of its binding prediction module (IEDB tools) during its first run. You will need to accept a license, and then you are ready to go, NovumRNA takes care of the installation.
