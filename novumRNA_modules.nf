@@ -85,9 +85,10 @@ process 'Unzip' {
   tuple val(meta), path(fastq), path(HLA_types_I), path(HLA_types_II)
 
   output:
-  tuple val(meta), path("*.fastq"), path(HLA_types_I), path(HLA_types_II)
-    
+  tuple val(meta), path(output_pattern), path(HLA_types_I), path(HLA_types_II)
+
   script:
+  output_pattern = (fastq.every { fq -> fq.endsWith('.gz') }) ? "*.fastq" : fastq
  """
   for fq in $fastq; do
     if [[ "\$fq" == *.gz ]]; then
