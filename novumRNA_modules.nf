@@ -88,11 +88,12 @@ process 'Unzip' {
   tuple val(meta), path(output_pattern), path(HLA_types_I), path(HLA_types_II)
 
   script:
-  output_pattern = (fastq.every { fq -> fq.endsWith('.gz') }) ? "*.fastq" : fastq
+  output_pattern = (fastq[0].getExtension() == "gz") ? "*.fastq" : fastq
  """
   for fq in $fastq; do
     if [[ "\$fq" == *.gz ]]; then
-      gunzip -f "\$fq"
+      unzipped_name="\${fq%.gz}"
+      gunzip -cf "\$fq" > "\$unzipped_name"
     fi
   done
 
