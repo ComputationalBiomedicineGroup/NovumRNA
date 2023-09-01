@@ -596,7 +596,7 @@ process 'Collect_binding' {
     
   script:
     """
-   head -2 *1_peptides_I_binding.tsv > "${meta.ID}_final_I_out.tsv"; tail -n +3 -q *_peptides_I_binding.tsv >> "${meta.ID}_final_I_out.tsv"
+   head -2 *01_peptides_I_binding.tsv > "${meta.ID}_final_I_out.tsv"; tail -n +3 -q *_peptides_I_binding.tsv >> "${meta.ID}_final_I_out.tsv"
     """
 }
 
