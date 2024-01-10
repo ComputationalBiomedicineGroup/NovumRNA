@@ -26,12 +26,12 @@ Filtering["Peptide_STOP"] = Filtering[0].str.split("_").str[2].astype(int)
 Filtering = Filtering.drop([0, 2], axis = 1)
 
 VAF = pd.read_csv(args.VAF, sep='\t', header=None)
-VAF = VAF[[3,4,6,9,15,16,17]]
+VAF = VAF[[3,4,6,9,15,16,17,22]]
 VAF_Filtering = pd.merge(how = "inner", left=Filtering, right=VAF, left_on=["Transcript"], right_on=[9])
 VAF_Filtering["Remove"] = np.where((VAF_Filtering["Peptide_START"] >= VAF_Filtering[3]) & (VAF_Filtering["Peptide_STOP"] <= VAF_Filtering[4]), "Fine", "Remove")
 VAF_Filtering = VAF_Filtering[VAF_Filtering["Remove"] != "Remove"]
 VAF_Filtering = VAF_Filtering.drop(["Remove", 3, 4, 6, 9], axis = 1)
-VAF_Filtering.columns = ["Peptide", "Annotation", "Transcript", "Peptide_START", "Peptide_STOP", "isoform_count", "TPM_iso_fraction", "Cov_within_VAF"]
+VAF_Filtering.columns = ["Peptide", "Annotation", "Transcript", "Peptide_START", "Peptide_STOP", "isoform_count", "TPM_iso_perc", "Cov_within_VAF", "Gene"]
 
 BED = pd.read_csv(args.BED, sep='\t')
 BED = BED[["Chr", "E_START", "E_STOP", "STRAND", "Annotation", "NT_Overlap", "Overlap_perc", "ID", "E_Coverage", "TPM"]]
@@ -45,7 +45,7 @@ BED_Filtering = BED_Filtering[BED_Filtering["Remove"] != "Remove"]
 BED_Filtering = BED_Filtering.drop("Remove", axis = 1)
 
 Translation = pd.read_csv(args.Translation, sep='\t')
-Translation = Translation[["ID", "Transcript_ref"]]
+Translation = Translation[["ID", "Translation_ref"]]
 Translation = Translation.drop_duplicates()
 Translation["Transcript"] = Translation["ID"].str.split("_").str[2]
 Translation["ID"] = Translation["ID"].str.split('_STRG').str[0]
@@ -91,10 +91,26 @@ Specific = Specific.drop_duplicates("Full")
 Final = pd.merge(left=BED_Filtering_Translation_2_BIND, right=Specific, left_on=["Peptide"], 
                          right_on=["Full"], how='left')
 
-Final["Mismatch"] = Final["Mismatch"].str.strip("[]")
+Final["Mismatch"] = Final["Mismatch"].str.replace(r"[\[\]()' ]", "", regex=True)
+
+def process_mismatch(row):
+    if not row or row.strip() == '':
+        return '', '', ''
+    parts = row.split(',')
+    # Splitting parts into three groups
+    SNP, Ref_NT, SNP_pos = [], [], []
+    for i in range(0, len(parts), 3):
+        # Add checks to prevent index errors
+        SNP.append(parts[i] if i < len(parts) else '')
+        Ref_NT.append(parts[i+1] if i+1 < len(parts) else '')
+        SNP_pos.append(parts[i+2] if i+2 < len(parts) else '')
+    return ','.join(SNP), ','.join(Ref_NT), ','.join(SNP_pos)
+
+Final[['SNP', 'Ref_NT', 'SNP_pos']] = Final['Mismatch'].apply(process_mismatch).tolist()
+
 Final = Final.dropna()
-Final_2 = Final[["Chr", "Peptide_START", "Peptide_STOP", "Peptide", "Transcript", "STRAND", "ID", "Mismatch"]]
-Final_3 = Final.drop(["Chr", "Peptide_START", "Peptide_STOP", "Transcript", "ID", "Peptide", "STRAND", "Full", "Mismatch"], axis = 1)
+Final_2 = Final[["Chr", "Peptide_START", "Peptide_STOP", "Peptide", "Transcript", "STRAND", "ID", "SNP", "Ref_NT", "SNP_pos"]]
+Final_3 = Final.drop(["Chr", "Peptide_START", "Peptide_STOP", "Transcript", "ID", "Peptide", "STRAND", "Full", "Mismatch", "SNP", "Ref_NT", "SNP_pos"], axis = 1)
 Final_4 = pd.concat([Final_2, Final_3], axis=1)
 
 def switch_2(Input):

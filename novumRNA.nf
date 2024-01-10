@@ -2,8 +2,9 @@
 
 nextflow.enable.dsl=2
 
-include {install_IEDB; Indices; Unzip; OptiType; alignment; HLA_extraction; HLA_HD; StringTie; Create_capture_bed; Protein_to_peptides; Filtering; Translation; Translation_2; Capture_regions; BAM_coverage; pVACbind_class_I; pVACbind_class_II; Final_MHCI; Final_MHCII; Combine; Collect_binding; Collect_binding_II; Rerun_samplesheet} from "./novumRNA_modules.nf"
+include {install_IEDB; Indices; OptiType; alignment; HLA_extraction; HLA_HD; StringTie; Create_capture_bed; Protein_to_peptides; Filtering; Translation; Translation_2; Capture_regions; BAM_coverage; pVACbind_class_I; pVACbind_class_II; Final_MHCI; Final_MHCII; Combine; Collect_binding; Collect_binding_II; Rerun_samplesheet} from "./novumRNA_modules.nf"
 
+// Workflows
 
 workflow analysis {
 
@@ -19,7 +20,7 @@ if (params.accept_license) {
 
 def raw_data = []
 if (params.input_fastq == "${params.input_ref}/samplesheet_CRC_fastq_sub.csv") {
-  raw_data.add([[ID:"Test_CRC01",libType:"PE"],["${params.input_ref}/AK11_CRC01_R1_combined_clean_rmdup.fastq", "${params.input_ref}/AK11_CRC01_R2_combined_clean_rmdup.fastq"],params.default_hla,"${params.input_ref}/HLA_class_II_default_alleles.txt"])
+  raw_data.add([[ID:"Test_CRC01",libType:"PE"],["${params.input_ref}/AK11_CRC01_R1_combined_clean_rmdup.fastq.gz", "${params.input_ref}/AK11_CRC01_R2_combined_clean_rmdup.fastq.gz"],params.default_hla,"${params.input_ref}/HLA_class_II_default_alleles.txt"])
 }
 else {
   def batchCSV = file(params.input_fastq).splitCsv(header:true)
@@ -53,15 +54,14 @@ else {
 }
 
 batch_raw_data_ch = Channel.fromList(raw_data)
-Unzip(batch_raw_data_ch)
 install_IEDB(params.IEDB_MHCI_url, params.IEDB_MHCII_url, params.IEDB_check)
 Indices(params.genome, params.hisat_index, params.star_index)
 Protein_to_peptides(params.ref_proteome, params.Ref_pep, params.peptide_length)
 OptiType(batch_raw_data_ch, params.HLA_ref)
-alignment(params.genome, params.aligner, Indices.out[0], Indices.out[1], params.hisat_index, params.star_index, Unzip.out, params.two_pass, params.riboseq)  
+alignment(params.genome, params.aligner, Indices.out[0], Indices.out[1], params.hisat_index, params.star_index, batch_raw_data_ch, params.two_pass, params.riboseq)  
 HLA_extraction(alignment.out[0].join(batch_raw_data_ch))
 HLA_HD(HLA_extraction.out.join(batch_raw_data_ch))
-StringTie(alignment.out[0], params.reference_GTF)
+StringTie(alignment.out[0], params.reference_GTF, params.genes)
 Capture_regions(StringTie.out[0], params.tpm_min_novel, params.cov_min_novel, params.tpm_min_diff, params.cov_min_diff, params.capture_bed)
 Translation(StringTie.out[0].join(Capture_regions.out[0]).transpose(), params.genome, params.reference_GTF, params.ref_proteome, params.peptide_length, params.split_BAM_coverage, params.ref_range)
 BAM_coverage(Translation.out[0].join(alignment.out[0]).transpose(), params.aligner, params.BAM_cov)
@@ -185,10 +185,9 @@ workflow capture_bed {
     }
     }
   batch_raw_data_ch = Channel.fromList(raw_data)
-  Unzip(batch_raw_data_ch)
   Indices(params.genome, params.hisat_index, params.star_index)
-  alignment(params.genome, params.aligner, Indices.out[0], Indices.out[1], params.hisat_index, params.star_index, Unzip.out, params.two_pass, params.riboseq)  
-  StringTie(alignment.out[0], params.reference_GTF)
+  alignment(params.genome, params.aligner, Indices.out[0], Indices.out[1], params.hisat_index, params.star_index, batch_raw_data_ch, params.two_pass, params.riboseq)  
+  StringTie(alignment.out[0], params.reference_GTF, params.genes)
   Create_capture_bed(StringTie.out[1].collect(), params.tpm_max_diff, params.cov_max_diff, params.genome_length)
 }
 

@@ -88,7 +88,7 @@ def get_matching(Input):
     aa_seqs2 = ','.join(str(v) for v in aa_seqs)
     aa_seqs2 = aa_seqs2.split(',')
     aa_seqs2 = list(filter(None, aa_seqs2))
-    if Input.Transcript_ref != "No_ref":
+    if Input.Translation_ref != "No_ref":
         Merged = list(itertools.product(aa_seqs2, [Input.Ref_protein]))
         Test_4 = pd.DataFrame(map(get_overlap, Merged))
         Test_max = Test_4[Test_4[2]==Test_4[2].max()]
@@ -166,7 +166,7 @@ def closest_value(Input):
   Test_2 = Test_1["ID"].iloc[0]
   Diff = Input[3] - abs(arr[i])
   if (abs(Diff) <= args.Ref_range) & (Test_1["Protein"].iloc[0] != "NONE"):
-            Confidence = "Protein_ref"
+            Confidence = Test_2
   elif (abs(Diff) > args.Ref_range) & (Test_1["Protein"].iloc[0] != "NONE"):
             Confidence = "No_ref"        
   return [Input[3], Input["Sequence"], Test_1[3].iloc[0], Test_1[6].iloc[0], Test_1["Protein"].iloc[0], Diff, Name, Test_2, Confidence]
@@ -200,13 +200,13 @@ try:
     len(Result.columns)
     Test = Result.replace('None', np.nan).bfill(axis=1).iloc[:, 0]
     df = pd.DataFrame.from_records(Test.reset_index(drop=True))
-    df.columns = ["my_START", "Sequence", "Ref_START", "STRAND", "Ref_protein", "Diff", "Transcript", "ref_Transcript", "Transcript_ref"]
-    df = df.sort_values(by=['Transcript_ref'])
+    df.columns = ["my_START", "Sequence", "Ref_START", "STRAND", "Ref_protein", "Diff", "Transcript", "ref_Transcript", "Translation_ref"]
+    df = df.sort_values(by=['Translation_ref'])
     df = df.drop_duplicates(["Ref_protein", "Transcript"], keep="first")
 except Exception as exception:
     df = pd.DataFrame.from_records(Result.reset_index(drop=True))
-    df.columns = ["my_START", "Sequence", "Ref_START", "STRAND", "Ref_protein", "Diff", "Transcript", "ref_Transcript", "Transcript_ref"]
-    df = df.sort_values(by=['Transcript_ref'])
+    df.columns = ["my_START", "Sequence", "Ref_START", "STRAND", "Ref_protein", "Diff", "Transcript", "ref_Transcript", "Translation_ref"]
+    df = df.sort_values(by=['Translation_ref'])
     df = df.drop_duplicates(["Ref_protein", "Transcript"], keep="first")
 
 df.to_csv(args.closest_out, sep='\t', index = False)
@@ -232,7 +232,7 @@ BED["ID_2"] = BED["ID"].str.rsplit('_', n=1).str[0]
 Test_8 = df[[6, 8]]
 BED_3 = pd.merge(how="inner", left=BED, right=Test_8, left_on="ID_2", right_on=6)
 BED_3 = BED_3.drop(["ID_2", 6], axis = 1)
-BED_3.rename(columns={8:'Transcript_ref'}, inplace=True)
+BED_3.rename(columns={8:'Translation_ref'}, inplace=True)
 
 def get_overlap_2(s1, s2, edge_2):
     edge = edge_2 -1

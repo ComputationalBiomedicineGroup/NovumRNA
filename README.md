@@ -1,28 +1,30 @@
-﻿# NovumRNA: A non-canonical neoantigen prediction pipeline
+﻿# NovumRNA: A non-canonical tumor specific antigen prediction pipeline
 
 ## Happy to see you!
 
-You want to predict non-canonical neoantigens (ncnas) from cancer RNA-seq data? You came to the right place! Thank you for having an interest in our tool NovumRNA! To ensure a smooth first experience with our tool, make sure to read this README carefully!
+You want to predict non-canonical tumor specific antigens (ncTSAs) from cancer RNA-seq data? You came to the right place! Thank you for having an interest in our tool NovumRNA! To ensure a smooth first experience with our tool, make sure to read this README carefully!
 
 This README is meant to provide an overview and help you to run your first analysis using NovumRNA. For further information on parameters and available workflows, please refer to the user manual:
 https://docs.google.com/document/d/1daVnVVYiOqdg7k4tWqshV0k8CYCQY0EBeGUC1gW4W8g/edit?usp=sharing
 
-And if you are interested in how individual modules exactly work, take a look at the supplementary material:
-TBA
+And if you are interested in how individual modules exactly work, take a look at the supplementary material of the NovumRNA publication.
 
 Happy predicting!
 
 ## Basic information about NovumRNA
 
-NovumRNA takes RNA-seq FASTQ files from Tumor and optionally RNA-seq from healthy tissue to predict non-canoical neoantigens (ncnas).
+NovumRNA takes RNA-seq FASTQ files from Tumor and optionally RNA-seq from healthy tissue to predict non-canoical tumor specific antigens (ncTSAs).
 
-In brief, NovumRNA takes single- or paired-end tumor RNA-seq FASTQ files as input. The pipeline also allows to re-run with intermediate files generated in a previous run. Reads are aligned to the reference genome with HISAT2 (Kim et al. 2019), or STAR (Dobin et al. 2013), to perform reference-guided transcript assembly using StringTie (Pertea et al. 2015). Tumor-specific and differentially expressed transcript fragments are identified by filtering against an internal normal control filtering database in the form of a capture BED file. Users can provide their own samples to extend the capture BED file. Transcript fragments need to fulfill expression and coverage criteria to be further considered, which can be defined by the user in the ```novumRNA.config``` file. Surviving transcript fragments are then translated and chopped into peptides of a specified length. Peptides are then filtered against the reference proteome. In parallel, the patient-specific human leukocyte antigen (HLA) class I and class II type is identified using OptiType (Szolek et al. 2014) and HLA-HD (Kawaguchi et al. 2017). Finally, tumor-specific peptides are tested for their binding affinity towards the patient’s HLA class I and class II molecules using netMHCpan-4.1 (Reynisson et al. 2020) and netMHCIIpan (Karosiene et al. 2013), to prioritize putative ncnas with higher likelihood of being presented to T cells. By providing additional annotation files, identified ncnas can be further categorized; NovumRNA by default provides a file to identify ncnas derived from ERVs.
+In brief, NovumRNA takes single- or paired-end tumor RNA-seq FASTQ files as input. The pipeline also allows to re-run with intermediate files generated in a previous run. Reads are aligned to the reference genome with HISAT2 (Kim et al. 2019), or STAR (Dobin et al. 2013), to perform reference-guided transcript assembly using StringTie (Pertea et al. 2015). Tumor-specific and differentially expressed transcript fragments are identified by filtering against an internal normal control filtering database in the form of a capture BED file. Users can provide their own samples to extend the capture BED file. Transcript fragments need to fulfill expression and coverage criteria to be further considered, which can be defined by the user in the ```novumRNA.config``` file. Surviving transcript fragments are then translated and chopped into peptides of a specified length. Peptides are then filtered against the reference proteome. In parallel, the patient-specific human leukocyte antigen (HLA) class I and class II type is identified using OptiType (Szolek et al. 2014) and HLA-HD (Kawaguchi et al. 2017). Finally, tumor-specific peptides are tested for their binding affinity towards the patient’s HLA class I and class II molecules using netMHCpan-4.1 (Reynisson et al. 2020) and netMHCIIpan (Karosiene et al. 2013), to prioritize putative ncTSAs with higher likelihood of being presented to T cells. By providing additional annotation files, identified ncTSAs can be further categorized; NovumRNA by default provides a file to identify ncTSAs derived from ERVs.
 
 ## Prerequisites
 
 NovumRNA is designed to run on a Linux based system.
 
-NovumRNA is implemented as nextflow dsl2 pipeline which runs based on singularity containers, so you need to have nextflow >= 23.04.2.5870 and singularity >=  3.8.7 already installed on your system.
+NovumRNA is implemented as nextflow dsl2 pipeline which runs based on singularity containers, so you need nextflow and singularity already installed on your system. 
+
+NovumRNA was tested with nextflow version 23.04.2.5870 and singularity version 3.8.7-1.el7.
+If you have older versions installed, consider updating them.
 
 If you don’t have them installed yet, the commands below may be used to install them.
  
@@ -62,7 +64,7 @@ Something similar goes for the HLA-class II allele caller HLA-HD. We are not all
 So when you have HLA-HD installed, specify the path in the novumRNA.config file:
 ```HLAHD_DIR``` = "/path/to/hlhd.x.x.x/”
 
-You don’t have HLA-HD or don’t want to use it? No big deal, the pipeline will run fine also without it, but you won’t get the HLA class II prediction. However, if you know which HLA-class II alleles you are interested in, there is also the possibility to provide them as input (see Usage: The csv samplesheet), the HLA-HD prediction will simply be skipped and you get your class II ncnas as well!
+You don’t have HLA-HD or don’t want to use it? No big deal, the pipeline will run fine also without it, but you won’t get the HLA class II prediction. However, if you know which HLA-class II alleles you are interested in, there is also the possibility to provide them as input (see Usage: The csv samplesheet), the HLA-HD prediction will simply be skipped and you get your class II ncTSAs as well!
 
 ## Usage: The novumRNA.config file
 
@@ -79,6 +81,10 @@ Specify here the path to your cloned NovumRNA git repository.
 ```outdir``` = “path/to/output_directory/”
 Specify here the path to where you want to have the pipeline output. If the directory is not present, it will be automatically created.
 
+If you want to specify these parameters directly on the command line (--outdir),
+instead of the config, make sure to use realpaths and add a "/" at the end. 
+In the config they are automatically converted.
+
 ```input_fastq``` = “/path/to/input_samplesheet.csv”
 Specify here the path to your own input_samplesheet.csv (see next section).
 
@@ -87,7 +93,11 @@ However, ```input_fastq``` the config file is already set to:
 
 This points to the testing data present in the resource bundle. As a first run, we recommend using the testing data, so maybe keep this unchanged for the first run and then set it to your own samplesheet for further runs. The testing data consists of downsampled, colorectal cancer organoid derived RNA-seq data.
 
-One more thing, depending on which scheduler you use, you need to define your scheduler parameters. This is done in so-called ```profiles```. Profiles are defined in the ```novumRNA.config``` file at the end. One is called singularity, you should leave this unchanged and always specify it for your runs (see Your first NovumRNA run). The profile called my_profile defines how nextflow will submit the jobs, this depends on what scheduler you use. Modify these parameters: executor = 'slurm/sge/other' and clusterOptions = {#!/bin/bash … } or use/modify the already built profiles defined for SGE and SLURM shedulers.
+One more thing, depending on which scheduler you use, you need to define your scheduler parameters. This is done in so-called ```profiles```. Profiles are defined in the ```novumRNA.config``` file at the end. One is called singularity, you should leave this unchanged and always specify it for your runs (see Your first NovumRNA run). The profile called my_profile defines how nextflow will submit the jobs, this depends on what scheduler you use. Modify these parameters: executor = 'slurm/sge/other' and clusterOptions = {#!/bin/bash … } or use/modify the already built profiles defined for SGE and SLURM schedulers.
+
+Note:
+NovumRNA was designed to use reference files (annotation GTF, genome FASTA) from gencode, 
+using other references might lead to unexpected behavior.
 
 ## Usage: The csv samplesheet
 
@@ -133,47 +143,51 @@ After the first run, please specifiy ```IEDB_check``` in the novumRNA.config fil
 
 The default configurations in the novumRNA.config file will produce output:
 hisat2 as aligner with a hisat2 index provided in the resource bundle (add ```--aligner star``` to the command to change to STAR as aligner, index will be created).
-Class I ncnas of length 9 aas (add your length to ```peptide_length```  = "9 15" in the config).
-Class II ncnas of length 15 aas, based on provided HLA class II alleles in the samplesheet, HLA-HD is not executed.
+Class I ncTSAs of length 9 aas (add your length to ```peptide_length```  = "9 15" in the config).
+Class II ncTSAs of length 15 aas, based on provided HLA class II alleles in the samplesheet, HLA-HD is not executed.
 
 ## Output explanation
 
-All results can be found in the ```outdir``` directory you specified in the config. You can find results from each module there, the final list of ncnas is present in the file ```yourID_final_class_I_prediction.tsv``` in the output folder ```Final_MHCI``` for class I and ```yourID_final_class_II_prediction.tsv``` in the output folder ```Final_MHCII``` for class II.
+All results can be found in the ```outdir``` directory you specified in the config. The main result, so the final list of ncTSAs is present in the file ```yourID_final_class_I_prediction.tsv``` in the output folder ```Final_MHCI``` for class I and ```yourID_final_class_II_prediction.tsv``` in the output folder ```Final_MHCII``` for class II. On the same level you will find a folder called ```Rerun_samplesheet```, containing the re-run samplesheet. The folder ```intermediate_results``` contains the output of all modules,
+e.g. the alignment BAM file, the StringTie GTF and other maybe relevant files.
 
 Only the IEDB installation, your own built indices (optional) and peptide references (optional) will appear in the resource bundle directory, more on this in the manual.
 
 Output columns:
 
 Note:
-Transcript refers to the transcript where the ncna derives from
-Exon refers to the exon within said transcript where the ncna derives from
+Transcript refers to the transcript where the ncTSA derives from
+Exon refers to the exon within said transcript where the ncTSA derives from
 TPM = Expression measurement, transcripts per million
 
-* ```Chr``` = Chromosome where the ncna is found
-* ```Peptide_START``` = Genomic start coordinate of ncna
-* ```Peptide_STOP``` = Genomic stop coordinate of ncna
-* ```Peptide``` = Ncna sequence
+* ```Chr``` = Chromosome where the ncTSA is found
+* ```Peptide_START``` = Genomic start coordinate of ncTSA
+* ```Peptide_STOP``` = Genomic stop coordinate of ncTSA
+* ```Peptide``` = ncTSA sequence
 * ```Transcript``` = StringTie transcript ID
 * ```STRAND``` = Genomic strand +/-
 * ```ID``` = ID given in the samplesheet
-* ```Mismatch``` = Nucleotide and position of SNPs in the ncna
-* ```Annotation``` = Ncna class, either INTERGENIC, INTRON or Differential
+* ```SNP``` = SNP in ncTSA (nucleotide)
+* ```Ref_NT``` = Reference nucleotide
+* ```SNP_pos``` = SNP position in the ncTSA (integer)
+* ```Annotation``` = ncTSA class, either INTERGENIC, INTRON or Differential
 * ```isoform_count``` = Number of transcript isoforms
 * ```TPM_iso_fraction``` = (all isoform TPM sum / transcript TPM)*100
-* ```Cov_within_VAF``` = Mean transcript exon coverage / ncna exon coverage
+* ```Cov_within_VAF``` = Mean transcript exon coverage / ncTSA exon coverage
+* ```Gene``` =  Gene the transcript is associated to, or "No_gene"
 * ```E_START``` = Exon start coordinate
 * ```E_STOP``` = Exon end coordinate
 * ```NT_Overlap``` = Exon nucleotides overlap with capture BED region.
 * ```Overlap_perc``` = Percentage of exon nucleotides overlap with capture BED region.
 * ```E_Coverage``` = Exon read coverage reported by StringTie
 * ```TPM``` = Expression of transcript in transcripts per million
-* ```Transcript_ref``` = Translation reference, either “Protein_ref” or “No_ref”
-* ```BAM_reads``` = Used reads (majority with same sequence) fully covering the ncna region in the BAM file
-* ```BAM_reads_all``` = All reads (including differences, like SNPs) fully covering the ncna region in the BAM file
-* ```Rank_HLA*``` = % Rank of ncna, binding prediction
-* ```REF``` = Ncna aa sequence based on reference genome
-* ```REF_NT``` = Ncna nt sequence based on reference genome
-* ```NEW_NT``` = Ncna nt sequence including patient SNPs (if present)
+* ```Transcript_ref``` = Translation ref, either ENST or “No_ref”. Check ENST in gencode v41.pc_translations.fa (resource bundle) for protein sequence.
+* ```BAM_reads``` = Used reads (majority with same sequence) fully covering the ncTSA region in the BAM file
+* ```BAM_reads_all``` = All reads (including differences, like SNPs) fully covering the ncTSA region in the BAM file
+* ```Rank_HLA*``` = % Rank of ncTSA, binding prediction
+* ```REF``` = ncTSA aa sequence based on reference genome
+* ```REF_NT``` = ncTSA nt sequence based on reference genome
+* ```NEW_NT``` = ncTSA nt sequence including patient SNPs (if present)
 * ```Annotation_2``` = provided extra annotation as BED file (default ERV annotation)
 * ```NT_Overlap_2``` = Exon nucleotides overlap with extra annotation BED region
 
@@ -187,6 +201,15 @@ TPM = Expression measurement, transcripts per million
 * Adapt profile ```my_profile``` to your system's scheduler, or use pre-built
 * Run with: nextflow run path/to/repo/novumRNA.nf -profile my_profile,singularity -w /path/to/work/  -c /path/to/repo/novumRNA.config -entry analysis
 * Set  “IEDB_check” in the config to path to “${params.input_ref}/iedb/iedb_install_ok.chck”
+
+## Space
+
+Disc space can quickly be an issue:
+* Make sure to clean the work directory regularly (-resume won't work anymore).
+* Consider deleting the intermediate_results in the outdir.
+* Use -entry ```analysis_short``` and the rerun samplesheet for a rerun.
+* Consider switching the ```publish_dir_mode``` in the config from ```copy``` to ```symlink```.
+
 
 ## We hope it worked!
 Following this small guide, we hope you have now a basic understanding how things work with NovumRNA and you should hopefully been able to run the tool using the provided test data, or your own data. If you are interested in using all the features of NovumRNA and learn more how to adapt it to your needs, read the official manual:
