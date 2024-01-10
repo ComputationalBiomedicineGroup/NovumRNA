@@ -45,7 +45,7 @@ string_1['isoform_count'] = np.nan
 string_1.loc[string_1[2] == 'transcript', 'isoform_count'] = string_1.loc[string_1[2] == 'transcript', 'ID_short'].groupby(string_1['ID_short']).transform('count')
 string_1['isoform_count'].fillna(method='ffill', inplace=True)
 string_1['isoform_count'] = string_1['isoform_count'].astype(int)
-string_1["TPM_iso_fraction"] = round((string_1["TPM"]/string_1["TPM_iso_sum"])*100, 1)
+string_1["TPM_iso_perc"] = round((string_1["TPM"]/string_1["TPM_iso_sum"])*100, 1)
 string_1["Cov_within_vaf"] = round(string_1["Cov"]/string_1["Cov_transcript"], 1)
 string_1["ID"] = 'STRG' + string_1["ID"].str.split("STRG", n=1).str[1]
 string_1 = string_1[string_1[2] == "exon"]

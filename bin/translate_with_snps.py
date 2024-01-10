@@ -23,7 +23,7 @@ def get_overlap(s1, s2):
     return s1[pos_a:pos_a+size]
 
 def get_mismatch(s1, s2):
-    x = [(s2[i],i) for i in range(len(s1)) if s1[i] != s2[i]]
+    x = [(s1[i],s2[i],i+1) for i in range(len(s1)) if s1[i] != s2[i]]
     return x
 
 seq_dict = {}
