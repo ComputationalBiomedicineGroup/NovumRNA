@@ -177,6 +177,7 @@ process 'StringTie' {
 }
 
 process 'HLA_extraction' {
+  errorStrategy 'ignore'
 
   input: 
   tuple val(meta), path (bam), path(bai), path(reads), path(HLA_types_I), path(HLA_types_II)
@@ -189,7 +190,7 @@ process 'HLA_extraction' {
   if [ $HLA_types_II == "HLA_II_default.txt" ]; then
     #Extract MHC region 
     samtools view -h -@ ${task.cpus} -f 2 -b $bam chr6:28,510,120-33,480,577 \
-    | samtools rmdup - | samtools sort -n - > "${meta.ID}_hla_sorted.bam"
+    | samtools sort -n - > "${meta.ID}_hla_sorted.bam"
     
     /bedtools2/bin/bedtools bamtofastq -i "${meta.ID}_hla_sorted.bam" \
     -fq "${meta.ID}_hlatmp.1.fastq" -fq2 "${meta.ID}_hlatmp.2.fastq"
@@ -201,6 +202,7 @@ process 'HLA_extraction' {
 }
 
 process 'HLA_HD' {
+  errorStrategy 'ignore'
 
   input: 
   tuple val(meta), path(fastq_1), path(fastq_2), path(reads), path(HLA_types_I), path(HLA_types_II)
