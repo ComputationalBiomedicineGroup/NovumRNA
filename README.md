@@ -49,7 +49,7 @@ The only two things you need to do are:
 1) Clone the repository to your system, which contains all the scripts you need.
 
 ```
-git clone git@github.com:ausserh/NovumRNA.git
+git clone https://github.com/ComputationalBiomedicineGroup/NovumRNA.git
 ```
 
 2) Download the NovumRNA resource bundle, containing the singularity containers, various reference files, testing data and many things more. The archive is 9 GB in size, when uncompressed it will increase to 16 GB, so make sure to have enough space.
@@ -172,7 +172,7 @@ TPM = Expression measurement, transcripts per million
 * ```SNP_pos``` = SNP position in the ncTSA (integer)
 * ```Annotation``` = ncTSA class, either INTERGENIC, INTRON or Differential
 * ```isoform_count``` = Number of transcript isoforms
-* ```TPM_iso_fraction``` = (all isoform TPM sum / transcript TPM)*100
+* ```TPM_iso_perc``` = (all isoform TPM sum / transcript TPM)*100
 * ```Cov_within_VAF``` = Mean transcript exon coverage / ncTSA exon coverage
 * ```Gene``` =  Gene the transcript is associated to, or "No_gene"
 * ```E_START``` = Exon start coordinate
