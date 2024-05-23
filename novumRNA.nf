@@ -19,8 +19,8 @@ if (params.accept_license) {
 }
 
 def raw_data = []
-if (params.input_fastq == "${params.input_ref}/samplesheet_CRC_fastq_sub.csv") {
-  raw_data.add([[ID:"Test_CRC01",libType:"PE"],["${params.input_ref}/AK11_CRC01_R1_combined_clean_rmdup.fastq.gz", "${params.input_ref}/AK11_CRC01_R2_combined_clean_rmdup.fastq.gz"],params.default_hla,"${params.input_ref}/HLA_class_II_default_alleles.txt"])
+if (params.input_fastq == "${params.input_ref}/Test_samplesheet.csv") {
+  raw_data.add([[ID:"Test_sample",libType:"PE"],["${params.input_ref}/Test_sample_1.fastq.gz", "${params.input_ref}/Test_sample_2.fastq.gz"],params.default_hla,"${params.input_ref}/HLA_class_II_default_alleles.txt"])
 }
 else {
   def batchCSV = file(params.input_fastq).splitCsv(header:true)

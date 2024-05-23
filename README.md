@@ -91,7 +91,7 @@ Specify here the path to your own input_samplesheet.csv (see next section).
 However, ```input_fastq``` the config file is already set to:
 "${params.input_ref}/samplesheet_CRC_fastq_sub.csv"
 
-This points to the testing data present in the resource bundle. As a first run, we recommend using the testing data, so maybe keep this unchanged for the first run and then set it to your own samplesheet for further runs. The testing data consists of downsampled, colorectal cancer organoid derived RNA-seq data.
+This points to the testing data present in the resource bundle. As a first run, we recommend using the testing data, so maybe keep this unchanged for the first run and then set it to your own samplesheet for further runs. The testing data consists of downsampled RNA-seq data from a melanoma cell line (SRR17424048).
 
 One more thing, depending on which scheduler you use, you need to define your scheduler parameters. This is done in so-called ```profiles```. Profiles are defined in the ```novumRNA.config``` file at the end. One is called singularity, you should leave this unchanged and always specify it for your runs (see Your first NovumRNA run). The profile called my_profile defines how nextflow will submit the jobs, this depends on what scheduler you use. Modify these parameters: executor = 'slurm/sge/other' and clusterOptions = {#!/bin/bash … } or use/modify the already built profiles defined for SGE and SLURM schedulers.
 
@@ -119,7 +119,7 @@ Here is how the samplesheet containing the testing data looks like:
 
 ```
 ID,Read1,Read2,HLA_types,HLA_types_II
-AK11_CRC01,AK11_CRC01_R1_combined_clean_rmdup.fastq,AK11_CRC01_R2_combined_clean_rmdup.fastq,,HLA_class_II_default_alleles.txt
+Test_sample_1.fastq.gz,Test_sample_2.fastq.gz,,HLA_class_II_default_alleles.txt
 ```
 As you can see, the column HLA_types can just be left empty, OptiType will run.
 
