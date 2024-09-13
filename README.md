@@ -55,7 +55,7 @@ git clone https://github.com/ComputationalBiomedicineGroup/NovumRNA.git
 2) Download the NovumRNA resource bundle, containing the singularity containers, various reference files, testing data and many things more. The archive is 9 GB in size, when uncompressed it will increase to 16 GB, so make sure to have enough space.
 
 ```
-wget -O "NovumRNA_resource_bundle.tar.gz" https://fileshare.uibk.ac.at/f/e9ac13c6822a4fc88c39/?dl=1
+wget -O "NovumRNA_resource_bundle.tar.gz" https://zenodo.org/records/13642055/files/NovumRNA_resource_bundle.tar.gz?download=1
 tar -xzvf NovumRNA_resource_bundle.tar.gz
 ```
 Did I say everything is already installed in the containers? Well, almost. Due to license restrictions, NovumRNA will install parts of its binding prediction module (IEDB tools) during its first run. You will need to accept a license, and then you are ready to go, NovumRNA takes care of the installation.
@@ -173,7 +173,7 @@ TPM = Expression measurement, transcripts per million
 * ```Annotation``` = ncTSA class, either INTERGENIC, INTRON or Differential
 * ```isoform_count``` = Number of transcript isoforms
 * ```TPM_iso_perc``` = (all isoform TPM sum / transcript TPM)*100
-* ```Cov_within_VAF``` = Mean transcript exon coverage / ncTSA exon coverage
+* ```Exon_cov_ratio``` = Mean transcript exon coverage / ncTSA exon coverage
 * ```Gene``` =  Gene the transcript is associated to, or "No_gene"
 * ```E_START``` = Exon start coordinate
 * ```E_STOP``` = Exon end coordinate

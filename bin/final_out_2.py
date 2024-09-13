@@ -31,7 +31,7 @@ VAF_Filtering = pd.merge(how = "inner", left=Filtering, right=VAF, left_on=["Tra
 VAF_Filtering["Remove"] = np.where((VAF_Filtering["Peptide_START"] >= VAF_Filtering[3]) & (VAF_Filtering["Peptide_STOP"] <= VAF_Filtering[4]), "Fine", "Remove")
 VAF_Filtering = VAF_Filtering[VAF_Filtering["Remove"] != "Remove"]
 VAF_Filtering = VAF_Filtering.drop(["Remove", 3, 4, 6, 9], axis = 1)
-VAF_Filtering.columns = ["Peptide", "Annotation", "Transcript", "Peptide_START", "Peptide_STOP", "isoform_count", "TPM_iso_perc", "Cov_within_VAF", "Gene"]
+VAF_Filtering.columns = ["Peptide", "Annotation", "Transcript", "Peptide_START", "Peptide_STOP", "isoform_count", "TPM_iso_perc", "Exon_cov_ratio", "Gene"]
 
 BED = pd.read_csv(args.BED, sep='\t')
 BED = BED[["Chr", "E_START", "E_STOP", "STRAND", "Annotation", "NT_Overlap", "Overlap_perc", "ID", "E_Coverage", "TPM"]]
