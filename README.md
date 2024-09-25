@@ -1,4 +1,6 @@
-﻿# NovumRNA: A non-canonical tumor specific antigen prediction pipeline
+﻿![NovumRNA overview](img/NovumRNA_logo_crop.png)
+
+# NovumRNA: A non-canonical tumor specific antigen prediction pipeline
 
 ## Happy to see you!
 
