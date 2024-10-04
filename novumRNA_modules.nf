@@ -682,7 +682,7 @@ process 'Final_MHCII' {
   --BED_2 $bed_2 --Specific $specific --BIND $bind --Out "${meta.ID}_final_out_combined_1.tsv" \
   --Out_header "${meta.ID}_final_out_combined_0.tsv"
 
-  if [ -s "${meta.ID}_final_out_combined_1.tsv"]; then
+  if [ -s "${meta.ID}_final_out_combined_1.tsv" ]; then
   
   /bedtools2/bin/bedtools intersect -wao -s -a "${meta.ID}_final_out_combined_1.tsv" \
   -b $anno_2 > "${meta.ID}_final_out_combined_2.tsv"
@@ -691,7 +691,7 @@ process 'Final_MHCII' {
   --BED_old "${meta.ID}_final_out_combined_0.tsv" --Out "${meta.ID}_final_class_II_prediction.tsv"
 
   else 
-    touch "${meta.ID}_final_class_II_prediction.tsv"
+    echo \"No ClassII peptides found \" > "${meta.ID}_final_class_II_prediction.tsv"
   fi
     """
 }
