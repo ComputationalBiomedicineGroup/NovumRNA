@@ -637,7 +637,8 @@ process 'Collect_binding' {
     
   script:
     """
-   head -2 *01_peptides_I_binding.tsv > "${meta.ID}_final_I_out.tsv"; \
+   HEADER_FILE=\$(ls *_peptides_I_binding.tsv | head -n 1) 
+   head -2 \$HEADER_FILE > "${meta.ID}_final_I_out.tsv"; \
    tail -n +3 -q *_peptides_I_binding.tsv >> "${meta.ID}_final_I_out.tsv"
     """
 }
@@ -708,8 +709,9 @@ process 'Collect_binding_II' {
     
   script:
     """
-   head -2 *01_peptides_II_binding.tsv > "${meta.ID}_final_II_out.tsv"; tail \
-   -n +3 -q *_peptides_II_binding.tsv >> "${meta.ID}_final_II_out.tsv"
+   HEADER_FILE=\$(ls *_peptides_II_binding.tsv | head -n 1) 
+   head -2 \$HEADER_FILE > "${meta.ID}_final_II_out.tsv"; \
+   tail -n +3 -q *_peptides_II_binding.tsv >> "${meta.ID}_final_II_out.tsv"
     """
 }
 
