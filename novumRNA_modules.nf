@@ -637,7 +637,8 @@ process 'Collect_binding' {
     
   script:
     """
-   head -2 *01_peptides_I_binding.tsv > "${meta.ID}_final_I_out.tsv"; \
+   HEADER_FILE=\$(ls *_peptides_I_binding.tsv | head -n 1) 
+   head -2 \$HEADER_FILE > "${meta.ID}_final_I_out.tsv"; \
    tail -n +3 -q *_peptides_I_binding.tsv >> "${meta.ID}_final_I_out.tsv"
     """
 }
@@ -681,12 +682,18 @@ process 'Final_MHCII' {
   /scripts/final_out_2.py --Filtering $filtering --VAF $vaf --BED $bed --Translation $translation \
   --BED_2 $bed_2 --Specific $specific --BIND $bind --Out "${meta.ID}_final_out_combined_1.tsv" \
   --Out_header "${meta.ID}_final_out_combined_0.tsv"
+
+  if [ -s "${meta.ID}_final_out_combined_1.tsv" ]; then
   
   /bedtools2/bin/bedtools intersect -wao -s -a "${meta.ID}_final_out_combined_1.tsv" \
   -b $anno_2 > "${meta.ID}_final_out_combined_2.tsv"
   
   /scripts/final_out_1.py --BED "${meta.ID}_final_out_combined_2.tsv" \
   --BED_old "${meta.ID}_final_out_combined_0.tsv" --Out "${meta.ID}_final_class_II_prediction.tsv"
+
+  else 
+    echo \"No ClassII peptides found \" > "${meta.ID}_final_class_II_prediction.tsv"
+  fi
     """
 }
 
@@ -702,8 +709,9 @@ process 'Collect_binding_II' {
     
   script:
     """
-   head -2 *01_peptides_II_binding.tsv > "${meta.ID}_final_II_out.tsv"; tail \
-   -n +3 -q *_peptides_II_binding.tsv >> "${meta.ID}_final_II_out.tsv"
+   HEADER_FILE=\$(ls *_peptides_II_binding.tsv | head -n 1) 
+   head -2 \$HEADER_FILE > "${meta.ID}_final_II_out.tsv"; \
+   tail -n +3 -q *_peptides_II_binding.tsv >> "${meta.ID}_final_II_out.tsv"
     """
 }
 
