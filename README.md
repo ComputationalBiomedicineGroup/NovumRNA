@@ -6,10 +6,8 @@
 
 You want to predict non-canonical tumor specific antigens (ncTSAs) from cancer RNA-seq data? You came to the right place! Thank you for having an interest in our tool NovumRNA! To ensure a smooth first experience with our tool, make sure to read this README carefully!
 
-This README is meant to provide an overview and help you to run your first analysis using NovumRNA. For further information on parameters and available workflows, please refer to the user manual:
+This README is meant to provide an overview and help you to run your first analysis using NovumRNA. For further information on parameters, available workflows and general information on how individual modules work, please refer to the user manual:
 https://docs.google.com/document/d/1daVnVVYiOqdg7k4tWqshV0k8CYCQY0EBeGUC1gW4W8g/edit?usp=sharing
-
-And if you are interested in how individual modules exactly work, take a look at the supplementary material of the NovumRNA publication.
 
 Happy predicting!
 
@@ -193,6 +191,12 @@ TPM = Expression measurement, transcripts per million
 * ```Annotation_2``` = provided extra annotation as BED file (default ERV annotation)
 * ```NT_Overlap_2``` = Exon nucleotides overlap with extra annotation BED region
 
+## Information
+
+If HLA-HD is not installed and no HLA class II alleles are provided as input, the module  ```HLA-HD ``` will fail. However, this is expected, and the pipeline will continue running regardless.
+
+The modules  ```pVACbind_class_I ``` and  ```pVACbind_class_II ``` may occasionally fail for one subjob while the others work fine. If this occurs, try resuming the run; the failed subjob should complete on the next attempt.
+
 ## Summary
 
 * Make sure nextflow and singularity are installed
@@ -212,6 +216,9 @@ Disc space can quickly be an issue:
 * Use -entry ```analysis_short``` and the rerun samplesheet for a rerun.
 * Consider switching the ```publish_dir_mode``` in the config from ```copy``` to ```symlink```.
 
+## Issues?
+
+NovumRNA is still relatively new. If you run into any issues, please don't hesitate to open an issue ticket on GitHub. Let's work together to make the pipeline more robust!
 
 ## We hope it worked!
 Following this small guide, we hope you have now a basic understanding how things work with NovumRNA and you should hopefully been able to run the tool using the provided test data, or your own data. If you are interested in using all the features of NovumRNA and learn more how to adapt it to your needs, read the official manual:
