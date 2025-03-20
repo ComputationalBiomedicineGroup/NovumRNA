@@ -1,0 +1,110 @@
+The Clear BSD License (BSD 3-Clause Clear License)
+
+Copyright (c) 2023-2024 Leopold Franzens Universität Innsbruck
+contributors: Markus Ausserhofer, Francesca Finotello, Dietmar Rieder
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted
+(subject to the limitations in the disclaimer below) provided that the following conditions
+are met:
+
+Redistributions of source code must retain the above copyright notice, this list of conditions
+and the following disclaimer. Redistributions in binary form must reproduce the above copyright
+notice, this list of conditions and the following disclaimer in the documentation and/or other
+materials provided with the distribution. Neither the name of the Leopold Franzens Universität Innsbruck nor the names of its contributors may be used to endorse or promote products derived 
+from this software without specific prior written permission.
+
+NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY THIS LICENSE.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS
+OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
+WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+Licenses for Tools used by NovumRNA:
+-------------------------------------
+NovumRNA uses a variety of other tools which each have their own license restrictions.
+The user is aware that NovumRNA will use Singularity images from the public accessible
+NovumRNA resource bundle.
+By using NovumRNA, the user implicitly accepts the license terms of the underlying tools used.
+By using the standalone IEDB software installed in the NovumRNA Singularity images, the user also
+implicitly accepts the IEDB license terms.
+
+IEDB (Immune Epitope Database)
+Website: https://www.iedb.org
+
+Citation: Vita R, Mahajan S, Overton JA, Dhanda SK, Martini S, Cantrell JR, Wheeler DK, Sette A,
+          Peters B. The Immune Epitope Database (IEDB): 2018 update. Nucleic Acids Res. 2018 Oct 24.
+          doi: 10.1093/nar/gky1006. [Epub ahead of print] PubMed PMID: 30357391.
+
+License: Non-Profit OSL 3.0
+By using the IEDB software, you are consenting to be bound by and become a “Licensee” for the use
+of IEDB tools and are consenting to the terms and conditions of the Non-Profit Open Software License
+(“Non-Profit OSL”) version 3.0.
+
+Please read these license agreement here [1] before proceeding. If you do not agree to all of the
+terms of these the agreement, you must not install or use the product. Companies (for-profit entities)
+interested in downloading the command-line versions of the IEDB tools or running the entire analysis
+resource locally, should contact IEDB (license@iedb.org) for details on licensing options.
+
+[1]: http://tools.iedb.org/mhci/download/
+
+Yara
+Website: https://github.com/seqan/seqan/tree/master/apps/yara
+Citation: Siragusa, E., Weese D., and Reinert, K. (2013). Fast and accurate read mapping with
+approximate seeds and multiple backtracking. Nucleic Acids Research, 2013, 1–8.
+License: BSD 3-Clause License
+
+OptiType
+Website: https://github.com/FRED-2/OptiType
+Citation: Szolek A, Schubert B, Mohr C, Sturm M, Feldhahn M, Kohlbacher O (2014).
+OptiType: precision HLA typing from next-generation sequencing data. Bioinformatics, 30(23):3310-6.
+License: BSD 3-Clause License
+
+STAR
+Website: https://github.com/alexdobin/STAR
+Citation: Dobin A, Davis CA, Schlesinger F, Drenkow J, Zaleski C, Jha S, Batut P, Chaisson M, Gingeras TR (2013).
+STAR: ultrafast universal RNA-seq aligner. Bioinformatics, 29(1):15-21.
+License: MIT License
+
+Hisat2
+Website: https://github.com/DaehwanKimLab/hisat2
+Citation: Kim, D., Paggi, J.M., Park, C. et al. 
+Graph-based genome alignment and genotyping with HISAT2 and HISAT-genotype. Nat Biotechnol 37, 907–915 (2019).
+License: GNU General Public License v3.0
+
+Bedtools
+Website: https://github.com/arq5x/bedtools2
+Citation: Quinlan AR, Hall IM (2010).
+BEDTools: a flexible suite of utilities for comparing genomic features. Bioinformatics, 26(6):841-842.
+License: GNU General Public License v2
+
+SeqKit
+Website: https://github.com/shenwei356/seqkit
+Citation: Shen W, Le S, Li Y, Hu F (2016).
+SeqKit: a cross-platform and ultrafast toolkit for FASTA/Q file manipulation. PLOS ONE, https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0163962.
+License: MIT License
+
+StringTie
+Website: https://github.com/gpertea/stringtie
+Citation: Pertea M, Pertea GM, Antonescu CM, Chang TC, Mendell JT, Salzberg SL (2015).
+StringTie enables improved reconstruction of a transcriptome from RNA-seq reads. Nature Biotechnology, 33(3):290-295.
+License: MIT License
+
+Jvarkit - sortsamrefname.jar
+Website: http://lindenb.github.io/jvarkit/SortSamRefName.html
+Citation: Lindenbaum P (2015): JVarkit: java-based utilities for Bioinformatics. 
+License: MIT License
+
+Jvarkit - biostar154220.jar
+Website: http://lindenb.github.io/jvarkit/Biostar154220.html
+Citation: Lindenbaum P (2015): JVarkit: java-based utilities for Bioinformatics.
+License: MIT License
+
+Jvarkit - sam4weblogo.jar
+Website: http://lindenb.github.io/jvarkit/SAM4WebLogo.html
+Citation: Lindenbaum P (2015): JVarkit: java-based utilities for Bioinformatics.
+License: MIT License
