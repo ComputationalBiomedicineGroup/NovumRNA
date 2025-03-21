@@ -17,23 +17,23 @@ NovumRNA takes RNA-seq FASTQ files from Tumor and optionally RNA-seq from health
 
 In brief, NovumRNA takes single- or paired-end tumor RNA-seq FASTQ files as input. The pipeline also allows to re-run with intermediate files generated in a previous run. Reads are aligned to the reference genome with HISAT2 (Kim et al. 2019), or STAR (Dobin et al. 2013), to perform reference-guided transcript assembly using StringTie (Pertea et al. 2015). Tumor-specific and differentially expressed transcript fragments are identified by filtering against an internal normal control filtering database in the form of a capture BED file. Users can provide their own samples to extend the capture BED file. Transcript fragments need to fulfill expression and coverage criteria to be further considered, which can be defined by the user in the ```novumRNA.config``` file. Surviving transcript fragments are then translated and chopped into peptides of a specified length. Peptides are then filtered against the reference proteome. In parallel, the patient-specific human leukocyte antigen (HLA) class I and class II type is identified using OptiType (Szolek et al. 2014) and HLA-HD (Kawaguchi et al. 2017). Finally, tumor-specific peptides are tested for their binding affinity towards the patient’s HLA class I and class II molecules using netMHCpan-4.1 (Reynisson et al. 2020) and netMHCIIpan (Karosiene et al. 2013), to prioritize putative ncTSAs with higher likelihood of being presented to T cells. By providing additional annotation files, identified ncTSAs can be further categorized; NovumRNA by default provides a file to identify ncTSAs derived from ERVs.
 
-## List of tools
+## Tools Employed by the NovumRNA Pipeline
 
-YARA v. 1.0.2 (Dadi et al. 2018)
-OptiType v. 1.3.3 (Szolek et al. 2014)
-Samtools v. 1.12 (Li et al. 2009)
-Bedtools v. 2.26.0 (Quinlan and Hall 2010)
-HISAT2 v. 2.1.0 (Kim et al. 2019)
-STAR v. 2.7.9a (Dobin et al. 2013)
-StringTie v. 2.1.4 (Pertea et al. 2015)
-Seqkit v. 2.0.0 (Shen et al. 2016)
-GFFread v. 0.12.3 (Pertea and Pertea 2020)
-jvarkit (sortsamrefname.jar (v. d29b24f2b), biostar154220.jar (v. d29b24f2b), sam4weblogo.jar (v. 1ca216453)) (Lindenbaum 2015)
-netMHCpan v. 4.1 (Reynisson et al. 2020)
-netMHCIIpan v. 4.0 (Reynisson et al. 2020)
-pVACtools v. 4.0.1 (Hundal et al. 2020)
-IEDB toolkit MHCI v. 3.1.2 (Vita et al. 2018)
-IEDB toolkit MHCI v. 3.1.6 (Vita et al. 2018)
+- YARA v. 1.0.2 (Dadi et al. 2018)  
+- OptiType v. 1.3.3 (Szolek et al. 2014)  
+- Samtools v. 1.12 (Li et al. 2009)  
+- Bedtools v. 2.26.0 (Quinlan and Hall 2010)  
+- HISAT2 v. 2.1.0 (Kim et al. 2019)  
+- STAR v. 2.7.9a (Dobin et al. 2013)  
+- StringTie v. 2.1.4 (Pertea et al. 2015)  
+- Seqkit v. 2.0.0 (Shen et al. 2016)  
+- GFFread v. 0.12.3 (Pertea and Pertea 2020)  
+- jvarkit (sortsamrefname.jar (v. d29b24f2b), biostar154220.jar (v. d29b24f2b), sam4weblogo.jar (v. 1ca216453)) (Lindenbaum 2015)  
+- netMHCpan v. 4.1 (Reynisson et al. 2020)  
+- netMHCIIpan v. 4.0 (Reynisson et al. 2020)  
+- pVACtools v. 4.0.1 (Hundal et al. 2020)  
+- IEDB toolkit MHCI v. 3.1.2 (Vita et al. 2018)  
+- IEDB toolkit MHCI v. 3.1.6 (Vita et al. 2018)
 
 ## Prerequisites
 
