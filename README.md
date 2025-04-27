@@ -237,34 +237,37 @@ If you run into any issues, please don't hesitate to open an issue ticket on Git
 <details>
 <summary>Resource Bundle Contents</summary>
 
-| File | Description | Source |
-|------|-------------|--------|
+| NovumRNA resource bundle files | Description | Source |
+|--------------------------------|-------------|--------|
 | capture_bed_GTEx_brain_120.bed | Capture BED file based on 120 GTEx brain samples | NovumRNA |
 | capture_bed_GTEx_colon_262.bed | Capture BED file based on 262 GTEx colon samples | NovumRNA |
 | capture_bed.bed | Default capture BED file based on TEC files | NovumRNA |
 | chr_lengths_clean.genome | Chromosome lengths needed for creating new capture BED files | Pre-computed from GRCh38.primary_assembly.genome.fa |
-| ERV_annotation.bed | ERV regions as BED from HERVd | Pre-computed from [herv.img.cas.cz](https://herv.img.cas.cz/downloads) |
-| gencode_all_genes.bed | Gencode genes from annotation, helper file | Pre-computed from gencode.v38.primary_assembly.annotation.gtf |
-| gencode.v38.primary_assembly.annotation.gtf | Gencode human release 38 annotation GTF file | [Gencode release 38](https://www.gencodegenes.org/human/release_38.html) |
-| gencode.v41.pc_translations.fa | Gencode human release 41 proteome FASTA file | [Gencode release 41](https://www.gencodegenes.org/human/release_41.html) |
-| GRCh38.primary_assembly.genome.fa | Gencode human release 38 genome FASTA file | [Gencode release 38](https://www.gencodegenes.org/human/release_38.html) |
-| HLA_class_II_default_alleles.txt | HLA class II genes for test run | NovumRNA |
-| HLA_default.txt | Placeholder to run OptiType | NovumRNA |
-| HLA_II_default.txt | Placeholder to run HLA-HD | NovumRNA |
-| hlahd | Placeholder for optional HLA-HD installation | NovumRNA |
-| iedb | Folder for IEDB toolkit installation | NovumRNA |
-| indices | Pre-built HISAT2 index | Pre-computed with HISAT2 |
+| ERV_annotation.bed | ERV regions as BED from HERVd | Pre-computed from https://herv.img.cas.cz/downloads (ERV) |
+| gencode_all_genes.bed | Gencode genes from gencode.v38.primary_assembly.annotation.gtf, helper file | Pre-computed from gencode.v38.primary_assembly.annotation.gtf |
+| gencode.v38.primary_assembly.annotation.gtf | Gencode human release 38 (GRCh38.p13) GTF file | https://www.gencodegenes.org/human/release_38.html |
+| gencode.v41.pc_translations.fa | Gencode human release 41 (GRCh38.p13) proteome FASTA file | https://www.gencodegenes.org/human/release_41.html |
+| GRCh38.primary_assembly.genome.fa | Gencode human release 38 (GRCh38.p13) genome FASTA file | https://www.gencodegenes.org/human/release_38.html |
+| HLA_class_II_default_alleles.txt | HLA class II genes DPA1*01:03-DPB1*01:01 for a test run | NovumRNA |
+| HLA_default.txt | Empty placeholder file to run OptiType, see manual | NovumRNA |
+| HLA_II_default.txt | Empty placeholder file to run HLA-HD, see manual | NovumRNA |
+| hlahd | Empty placeholder folder for optional hlahd installation | NovumRNA |
+| iedb | Empty folder, IEDB toolkit will be installed here on first run | NovumRNA |
+| indices | Contains HISAT2 pre-built index: /hisat2-2.1.0/hisat2-build GRCh38.primary_assembly.genome.fa hisat_index | Pre-computed with HISAT2 |
 | LICENSE | License agreement | NovumRNA |
-| my_indices | Folder for custom indices | NovumRNA |
+| my_indices | Empty folder, new HISAT2 or STAR indices will be stored here | NovumRNA |
 | NovumRNA.sif | Main singularity container | NovumRNA |
-| Pep_ref | Default self-peptides | NovumRNA |
-| pVACtools_container.sif | Container with pVACtools and pVACbind | NovumRNA |
-| STAR_dummy_index.txt | Placeholder file | NovumRNA |
-| Test_ref_pep.txt | Placeholder for generating self-peptides | NovumRNA |
-| Test_sample_1.fastq.gz | RNA-seq test data (forward) | Pre-computed from SRA: SRR17424048 |
-| Test_sample_2.fastq.gz | RNA-seq test data (reverse) | Pre-computed from SRA: SRR17424048 |
-| Test_samplesheet.csv | CSV samplesheet for test run | NovumRNA |
-| yara_index | RNA alignment reference files for YARA-mapper | Pre-computed with YARA |
+| Pep_ref | Contains Control_peptides_len_9_15_ref_pep.fasta, default self-peptides from gencode.v41.pc_translations.fa | NovumRNA |
+| pVACtools_container.sif | Singularity container with pVACtools with pVACbind | NovumRNA |
+| STAR_dummy_index.txt | Empty placeholder file | NovumRNA |
+| Test_ref_pep.txt | Empty placeholder file for generating self-peptides from gencode.v41.pc_translations.fa, see manual | NovumRNA |
+| Test_sample_1.fastq.gz | Downsampled RNA-seq data from a melanoma cell line (SRR17424048), forward | Pre-computed from SRA: SRR17424048 |
+| Test_sample_2.fastq.gz | Downsampled RNA-seq data from a melanoma cell line (SRR17424048), reverse | Pre-computed from SRA: SRR17424048 |
+| Test_samplesheet.csv | CSV samplesheet for a test run | NovumRNA |
+| yara_index | Contains hla_reference_rna, RNA based alignment reference files for YARA-mapper | Pre-computed with YARA |
+
+</details>
+
 
 </details>
 
