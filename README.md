@@ -2,14 +2,10 @@
 
 # NovumRNA: A non-canonical tumor specific antigen prediction pipeline
 
-## Happy to see you!
-
-You want to predict non-canonical tumor specific antigens (ncTSAs) from cancer RNA-seq data? You came to the right place! Thank you for having an interest in our tool NovumRNA! To ensure a smooth first experience with our tool, make sure to read this README carefully!
+NovumRNA predicts non-canonical tumor specific antigens (ncTSAs) from cancer RNA-seq data. To ensure a smooth first experience with our tool, make sure to read this README carefully!
 
 This README is meant to provide an overview and help you to run your first analysis using NovumRNA. For further information on parameters, available workflows and general information on how individual modules work, please refer to the user manual:
 https://docs.google.com/document/d/1daVnVVYiOqdg7k4tWqshV0k8CYCQY0EBeGUC1gW4W8g/edit?usp=sharing
-
-Happy predicting!
 
 ## Basic information about NovumRNA
 
@@ -39,7 +35,7 @@ In brief, NovumRNA takes single- or paired-end tumor RNA-seq FASTQ files as inpu
 
 NovumRNA is designed to run on a Linux based system.
 
-NovumRNA is implemented as nextflow dsl2 pipeline which runs based on singularity containers, so you need nextflow and singularity already installed on your system. 
+NovumRNA is implemented as nextflow dsl2 pipeline which runs based on singularity containers, nextflow and singularity need to be already installed on your system. 
 
 NovumRNA was tested with nextflow version 23.04.2.5870 and singularity version 3.8.7-1.el7.
 If you have older versions installed, consider updating them.
@@ -70,23 +66,23 @@ The only two things you need to do are:
 git clone https://github.com/ComputationalBiomedicineGroup/NovumRNA.git
 ```
 
-2) Download the NovumRNA resource bundle, containing the singularity containers, various reference files, testing data and many things more. The archive is 9 GB in size, when uncompressed it will increase to 16 GB, so make sure to have enough space.
+2) Download the NovumRNA resource bundle, containing the singularity containers, various reference files, testing data and many things more. The archive is 9 GB in size, when uncompressed it will increase to 16 GB.
 
 ```
 wget -O "NovumRNA_resource_bundle.tar.gz" https://zenodo.org/records/13642055/files/NovumRNA_resource_bundle.tar.gz?download=1
 tar -xzvf NovumRNA_resource_bundle.tar.gz
 ```
-Did I say everything is already installed in the containers? Well, almost. Due to license restrictions, NovumRNA will install parts of its binding prediction module (IEDB tools) during its first run. You will need to accept a license, and then you are ready to go, NovumRNA takes care of the installation.
+Due to license restrictions, NovumRNA will install parts of its binding prediction module (IEDB tools) during its first run. You will need to accept a license, and then you are ready to go, NovumRNA takes care of the installation.
 
 Something similar goes for the HLA-class II allele caller HLA-HD. We are not allowed to distribute its code. Therefore, HLA-HD needs to be already installed on your system. HLA-HD requires bowtie2, however, bowtie2 is already installed in the container.
 So when you have HLA-HD installed, specify the path in the novumRNA.config file:
 ```HLAHD_DIR``` = "/path/to/hlhd.x.x.x/”
 
-You don’t have HLA-HD or don’t want to use it? No big deal, the pipeline will run fine also without it, but you won’t get the HLA class II prediction. However, if you know which HLA-class II alleles you are interested in, there is also the possibility to provide them as input (see Usage: The csv samplesheet), the HLA-HD prediction will simply be skipped and you get your class II ncTSAs as well!
+You don’t have HLA-HD or don’t want to use it? No big deal, the pipeline will run fine also without it, but you won’t get the HLA class II prediction. However, if you know which HLA-class II alleles you are interested in, there is also the possibility to provide them as input (see Usage: The csv samplesheet), the HLA-HD prediction will simply be skipped and you get your class II ncTSAs as well.
 
 ## Usage: The novumRNA.config file
 
-Specifying the input, the output directory, changing references, aligner, or cut-offs, all of this happens in the ```novumRNA.config``` file, so this is your place to be!
+Specifying the input, the output directory, changing references, aligner, or cut-offs, all of this happens in the ```novumRNA.config``` file.
 
 More info on that in the manual, but here are the most essential positions you need to specify to get you started:
 
@@ -117,9 +113,7 @@ Note:
 NovumRNA was designed to use reference files (annotation GTF, genome FASTA) from gencode, 
 using other references might lead to unexpected behavior.
 
-## Usage: The csv samplesheet
-
-A samplesheet is a format to specify your input data, nowadays widely used with nextflow pipelines. Your input files are given in form of a table, values separated by commas, hence a csv file.
+## Usage: The csv input samplesheet
 
 The headers of this table consist of:
 ID,Read1,Read2,HLA_types,HLA_types_II
@@ -154,13 +148,13 @@ nextflow run path/to/repo/novumRNA.nf -profile my_profile,singularity -w /path/t
 * ```-entry```: use ```analysis``` for the standard prediction, see manual for other options.
 * ```--accept_license```: By adding this to the command, you accept the licenses of all tools used by NovumRNA. This is only needs to be specified the very first run! If not specified on your first run, NovumRNA displays the license and asks you to specify ```--accept_license```. The license can also be viewed in the resource bundle under ```license```.
 
-Add “-resume” to your command, if something fails, and you need to re-run, the pipeline will take off at the last completed module, it will save you a lot of time!
+Add “-resume” to your command, if something fails, and you need to re-run, the pipeline will take off at the last completed module.
 
 As mentioned before, NovumRNA will install the IEDB toolkit on your first run.
 After the first run, please specifiy ```IEDB_check``` in the novumRNA.config file to ${params.input_ref}/iedb/iedb_install_ok.chck. Like this the IEDB toolkit won’t be installed once more in a next run.
 
 The default configurations in the novumRNA.config file will produce output:
-hisat2 as aligner with a hisat2 index provided in the resource bundle (add ```--aligner star``` to the command to change to STAR as aligner, index will be created).
+hisat2 as aligner with a hisat2 index provided in the resource bundle.
 Class I ncTSAs of length 9 aas (add your length to ```peptide_length```  = "9 15" in the config).
 Class II ncTSAs of length 15 aas, based on provided HLA class II alleles in the samplesheet, HLA-HD is not executed.
 
@@ -236,8 +230,41 @@ Disc space can quickly be an issue:
 
 ## Issues?
 
-NovumRNA is still relatively new. If you run into any issues, please don't hesitate to open an issue ticket on GitHub. Let's work together to make the pipeline more robust!
+If you run into any issues, please don't hesitate to open an issue ticket on GitHub. Let's work together to make the pipeline more robust!
 
-## We hope it worked!
-Following this small guide, we hope you have now a basic understanding how things work with NovumRNA and you should hopefully been able to run the tool using the provided test data, or your own data. If you are interested in using all the features of NovumRNA and learn more how to adapt it to your needs, read the official manual:
-https://docs.google.com/document/d/1daVnVVYiOqdg7k4tWqshV0k8CYCQY0EBeGUC1gW4W8g/edit?usp=sharing
+## Resource bundle contents
+
+<details>
+<summary>Resource Bundle Contents</summary>
+
+| File | Description | Source |
+|------|-------------|--------|
+| capture_bed_GTEx_brain_120.bed | Capture BED file based on 120 GTEx brain samples | NovumRNA |
+| capture_bed_GTEx_colon_262.bed | Capture BED file based on 262 GTEx colon samples | NovumRNA |
+| capture_bed.bed | Default capture BED file based on TEC files | NovumRNA |
+| chr_lengths_clean.genome | Chromosome lengths needed for creating new capture BED files | Pre-computed from GRCh38.primary_assembly.genome.fa |
+| ERV_annotation.bed | ERV regions as BED from HERVd | Pre-computed from [herv.img.cas.cz](https://herv.img.cas.cz/downloads) |
+| gencode_all_genes.bed | Gencode genes from annotation, helper file | Pre-computed from gencode.v38.primary_assembly.annotation.gtf |
+| gencode.v38.primary_assembly.annotation.gtf | Gencode human release 38 annotation GTF file | [Gencode release 38](https://www.gencodegenes.org/human/release_38.html) |
+| gencode.v41.pc_translations.fa | Gencode human release 41 proteome FASTA file | [Gencode release 41](https://www.gencodegenes.org/human/release_41.html) |
+| GRCh38.primary_assembly.genome.fa | Gencode human release 38 genome FASTA file | [Gencode release 38](https://www.gencodegenes.org/human/release_38.html) |
+| HLA_class_II_default_alleles.txt | HLA class II genes for test run | NovumRNA |
+| HLA_default.txt | Placeholder to run OptiType | NovumRNA |
+| HLA_II_default.txt | Placeholder to run HLA-HD | NovumRNA |
+| hlahd | Placeholder for optional HLA-HD installation | NovumRNA |
+| iedb | Folder for IEDB toolkit installation | NovumRNA |
+| indices | Pre-built HISAT2 index | Pre-computed with HISAT2 |
+| LICENSE | License agreement | NovumRNA |
+| my_indices | Folder for custom indices | NovumRNA |
+| NovumRNA.sif | Main singularity container | NovumRNA |
+| Pep_ref | Default self-peptides | NovumRNA |
+| pVACtools_container.sif | Container with pVACtools and pVACbind | NovumRNA |
+| STAR_dummy_index.txt | Placeholder file | NovumRNA |
+| Test_ref_pep.txt | Placeholder for generating self-peptides | NovumRNA |
+| Test_sample_1.fastq.gz | RNA-seq test data (forward) | Pre-computed from SRA: SRR17424048 |
+| Test_sample_2.fastq.gz | RNA-seq test data (reverse) | Pre-computed from SRA: SRR17424048 |
+| Test_samplesheet.csv | CSV samplesheet for test run | NovumRNA |
+| yara_index | RNA alignment reference files for YARA-mapper | Pre-computed with YARA |
+
+</details>
+
