@@ -241,7 +241,8 @@ If you run into any issues, please don't hesitate to open an issue ticket on Git
 |--------------------------------|-------------|--------|
 | capture_bed_GTEx_brain_120.bed | Capture BED file based on 120 GTEx brain samples | NovumRNA |
 | capture_bed_GTEx_colon_262.bed | Capture BED file based on 262 GTEx colon samples | NovumRNA |
-| capture_bed.bed | Default capture BED file based on TEC files | NovumRNA |
+| capture_bed.bed | Default capture BED file based on 32 TEC samples | NovumRNA |
+| capture_bed_osteoblast_3_TEC_32.bed | Capture BED file based on 3 osteoblast and 32 TEC samples | NovumRNA |
 | chr_lengths_clean.genome | Chromosome lengths needed for creating new capture BED files | Pre-computed from GRCh38.primary_assembly.genome.fa |
 | ERV_annotation.bed | ERV regions as BED from HERVd | Pre-computed from https://herv.img.cas.cz/downloads (ERV) |
 | gencode_all_genes.bed | Gencode genes from gencode.v38.primary_assembly.annotation.gtf, helper file | Pre-computed from gencode.v38.primary_assembly.annotation.gtf |
